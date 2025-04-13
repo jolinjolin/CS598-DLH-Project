@@ -1,30 +1,23 @@
 
-# TIMER
+# CS598-DLH-Project
 
-This is the implementation of [Token Imbalance Adaptation for Radiology Report Generation](https://arxiv.org/user/) at CHIL-2023.
+This is the CS598 DLH Project to replicate TIMER model (Token Imbalance Adaptation for Radiology Report Generation)
 
-## Citations
+## References
 
-If you use or extend our work, please cite our paper at CHIL-2023.
+The original codebase is accesible at [github](https://github.com/woqingdoua/TIMER) and the published paper can be found at [Token Imbalance Adaptation for Radiology Report Generation](https://arxiv.org/abs/2304.09185)
+
+## Denpendencies
+### Install using conda
 ```
-@misc{wu2023token,
-      title={Token Imbalance Adaptation for Radiology Report Generation}, 
-      author={Yuexin Wu and I-Chan Huang and Xiaolei Huang},
-      year={2023},
-      eprint={2304.09185},
-      archivePrefix={arXiv},
-      primaryClass={cs.CL}
-}
+conda create --name TIMER --file env.yaml
 ```
-
-## Requirements
-
-- `torch==1.7.1`
-- `torchvision==0.8.2`
-- `opencv-python==4.4.0.42`
-
-## Download TIMER
-You can download the models we trained for each dataset from [here](https://github.com/zhjohnchan/R2GenCMN/blob/main/data/r2gencmn.md).
+### Install using pip
+```
+conda create --name TIMER python=3.8
+conda install pytorch==1.7.1 torchvision==0.8.2 torchaudio==0.7.2 cudatoolkit=11.0 -c pytorch
+pip install -r requirements.txt
+```
 
 ## Datasets
 We use two datasets (IU X-Ray and MIMIC-CXR) in our paper.
@@ -48,7 +41,5 @@ Run `bash test_iu_xray.sh` to test a model on the IU X-Ray data.
 
 Run `bash test_mimic_cxr.sh` to test a model on the MIMIC-CXR data.
 
-## Contacts
-Because the experimental datasets are too large to share all of them. Please send any requests or questions to my email: [ywu10@memphis.edu](ywu10@memphis.edu).
 
 
