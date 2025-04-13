@@ -11,6 +11,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from .att_base import pack_wrapper, AttBase
+from .helpers import *
 
 """
 This module implements a Transformer-based Encoder-Decoder architecture with Relational Memory for sequence-to-sequence tasks.
@@ -32,11 +33,6 @@ Classes:
     - RelationalMemory: Implements a relational memory module for conditioning the decoder.
     - R2Gen: A wrapper class for the Transformer model, integrating it with an attention-based model.
 
-Functions:
-    - clones(module, N): Creates N identical copies of a given module.
-    - attention(query, key, value, mask=None, dropout=None): Computes scaled dot-product attention.
-    - subsequent_mask(size): Creates a mask to prevent attention to subsequent positions in the sequence.
-
 Key Features:
     - The Transformer model uses multi-headed attention and feed-forward networks for both encoding and decoding.
     - Relational Memory is integrated into the decoder to condition its outputs based on learned memory representations.
@@ -51,27 +47,6 @@ Dependencies:
 Usage:
     This module is designed for sequence-to-sequence tasks such as machine translation, text summarization, and image captioning.
 """
-
-def clones(module, N):
-    return nn.ModuleList([copy.deepcopy(module) for _ in range(N)])
-
-
-def attention(query, key, value, mask=None, dropout=None):
-    d_k = query.size(-1)
-    scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
-    if mask is not None:
-        scores = scores.masked_fill(mask == 0, -1e9)
-    p_attn = F.softmax(scores, dim=-1)
-    if dropout is not None:
-        p_attn = dropout(p_attn)
-    return torch.matmul(p_attn, value), p_attn
-
-
-def subsequent_mask(size):
-    attn_shape = (1, size, size)
-    subsequent_mask = np.triu(np.ones(attn_shape), k=1).astype('uint8')
-    return torch.from_numpy(subsequent_mask) == 0
-
 
 class Transformer(nn.Module):
     def __init__(self, encoder, decoder, src_embed, tgt_embed, rm):
