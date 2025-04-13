@@ -4,8 +4,11 @@ from abc import abstractmethod
 import numpy as np
 import torch
 from numpy import inf
+from tqdm import tqdm
 from models.metalearning_model import MetaLearningModel
 import torch.nn.functional as F
+
+np.seterr(divide="ignore", invalid="ignore")
 
 """
 trainer.py
@@ -222,7 +225,7 @@ class BaseTrainer(object):
                 "on this machine.".format(n_gpu_use, n_gpu)
             )
             n_gpu_use = n_gpu
-        device = torch.device("cuda:1" if n_gpu_use > 0 else "cpu")
+        device = torch.device("cuda:0" if n_gpu_use > 0 else "cpu")
         list_ids = list(range(n_gpu_use))
         return device, list_ids
 

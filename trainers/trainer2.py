@@ -9,6 +9,8 @@ import progressbar
 import numpy as np
 from models.metalearning_model import MetaLearningModel
 
+np.seterr(divide="ignore", invalid="ignore")
+
 """
 This module contains the implementation of a base trainer class (`BaseTrainer`) and a derived trainer class (`Trainer`) 
 for training and evaluating machine learning models. The `BaseTrainer` class provides a generic framework for training 
