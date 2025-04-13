@@ -3,13 +3,14 @@ import argparse
 import numpy as np
 import torch
 
-from models.models import BaseCMNModel, R2GenModel
+from models.CMN_model import CMNModel
+from models.R2Gen_model import R2GenModel
 from dataloaders.dataloader import R2DataLoader
 from trainers.loss import compute_loss
 from trainers.metrics import compute_scores
 from trainers.optimizers import build_optimizer, build_lr_scheduler
-from utils.tokenizers import Tokenizer
 from trainers.trainer2 import Trainer
+from utils.tokenizers import Tokenizer
 
 
 def parse_agrs():
@@ -127,8 +128,8 @@ def main():
     test_dataloader = R2DataLoader(args, tokenizer, split='test', shuffle=False)
 
     # build model architecture
-    #model = BaseCMNModel(args, tokenizer)
-    #model2 = BaseCMNModel(args, tokenizer)
+    #model = CMNModel(args, tokenizer)
+    #model2 = CMNModel(args, tokenizer)
     model = R2GenModel(args, tokenizer)
     model2 = R2GenModel(args, tokenizer)
 

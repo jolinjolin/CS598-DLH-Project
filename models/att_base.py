@@ -8,15 +8,15 @@ import torch.nn.functional as F
 from torch.nn.utils.rnn import PackedSequence, pack_padded_sequence, pad_packed_sequence
 
 import utils.utils as utils
-from .caption_model import CaptionModel
+from .sampling_base import SamplingBase
 
 """
-This module defines the `AttModel` class, which is a neural network model for generating captions 
+This module defines the `AttBase` class, which is a neural network model for generating captions 
 based on attention mechanisms. It also includes utility functions for handling packed sequences 
 and attention features.
 
 Classes:
-    - AttModel: A caption generation model that uses attention mechanisms.
+    - AttBase: A caption generation model that uses attention mechanisms.
 
 Functions:
     - sort_pack_padded_sequence(input, lengths):
@@ -45,7 +45,7 @@ Functions:
         Returns:
             Tensor: Output of the module applied to the attention features.
 
-Class `AttModel`:
+Class `AttBase`:
     - __init__(self, args, tokenizer):
         Initializes the attention model with the given arguments and tokenizer.
         Args:
@@ -135,9 +135,9 @@ def pack_wrapper(module, att_feats, att_masks):
         return module(att_feats)
 
 
-class AttModel(CaptionModel):
+class AttBase(SamplingBase):
     def __init__(self, args, tokenizer):
-        super(AttModel, self).__init__()
+        super(AttBase, self).__init__()
         self.args = args
         self.tokenizer = tokenizer
         self.vocab_size = len(tokenizer.idx2token)

@@ -4,7 +4,7 @@ from abc import abstractmethod
 import numpy as np
 import torch
 from numpy import inf
-from models.models import MetaLearning
+from models.metalearning_model import MetaLearningModel
 import torch.nn.functional as F
 
 """
@@ -66,7 +66,7 @@ class BaseTrainer(object):
         # setup GPU device if available, move model into configured device
         self.device, device_ids = self._prepare_device(args.n_gpu)
         self.model = model.to(self.device)
-        self.metaRL = MetaLearning(model.tokenizer).to(self.device)
+        self.metaRL = MetaLearningModel(model.tokenizer).to(self.device)
         self.metarl_opt = torch.optim.Adam(self.metaRL.parameters(), lr=0.001, betas=(0.9, 0.99), eps=0.0000001)
 
         if len(device_ids) > 1:

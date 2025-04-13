@@ -7,7 +7,7 @@ from numpy import inf
 import torch.nn.functional as F
 import progressbar
 import numpy as np
-from models.models import MetaLearning
+from models.metalearning_model import MetaLearningModel
 
 """
 This module contains the implementation of a base trainer class (`BaseTrainer`) and a derived trainer class (`Trainer`) 
@@ -72,7 +72,7 @@ class BaseTrainer(object):
         if len(device_ids) > 1:
             self.model = torch.nn.DataParallel(model, device_ids=device_ids)
 
-        self.metaRL = MetaLearning(model.tokenizer).to(self.device)
+        self.metaRL = MetaLearningModel(model.tokenizer).to(self.device)
         self.metarl_opt = torch.optim.Adam(self.metaRL.parameters(), lr=0.002, betas=(0.9, 0.99), eps=0.0000001)
 
         self.criterion = criterion

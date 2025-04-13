@@ -10,7 +10,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .att_model import pack_wrapper, AttModel
+from .att_base import pack_wrapper, AttBase
 
 """
 This module implements a Transformer-based Encoder-Decoder architecture with Relational Memory for sequence-to-sequence tasks.
@@ -30,7 +30,7 @@ Classes:
     - Embeddings: Embeds input tokens into a continuous vector space.
     - PositionalEncoding: Adds positional information to the token embeddings.
     - RelationalMemory: Implements a relational memory module for conditioning the decoder.
-    - EncoderDecoder: A wrapper class for the Transformer model, integrating it with an attention-based model.
+    - R2Gen: A wrapper class for the Transformer model, integrating it with an attention-based model.
 
 Functions:
     - clones(module, N): Creates N identical copies of a given module.
@@ -42,7 +42,7 @@ Key Features:
     - Relational Memory is integrated into the decoder to condition its outputs based on learned memory representations.
     - Conditional Layer Normalization is used in the decoder to adapt normalization parameters based on relational memory.
     - Positional encoding is added to embeddings to provide positional information to the model.
-    - The EncoderDecoder class provides a high-level interface for sequence-to-sequence tasks, including feature preparation and forward passes.
+    - The R2Gen class provides a high-level interface for sequence-to-sequence tasks, including feature preparation and forward passes.
 
 Dependencies:
     - PyTorch: The module relies on PyTorch for defining and training neural networks.
@@ -339,7 +339,7 @@ class RelationalMemory(nn.Module):
         return outputs
 
 
-class EncoderDecoder(AttModel):
+class R2Gen(AttBase):
 
     def make_model(self, tgt_vocab):
         c = copy.deepcopy
@@ -361,7 +361,7 @@ class EncoderDecoder(AttModel):
         return model
 
     def __init__(self, args, tokenizer):
-        super(EncoderDecoder, self).__init__(args, tokenizer)
+        super(R2Gen, self).__init__(args, tokenizer)
         self.args = args
         self.num_layers = args.num_layers
         self.d_model = args.d_model

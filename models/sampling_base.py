@@ -9,12 +9,12 @@ import torch.nn.functional as F
 import utils.utils as utils
 
 """
-CaptionModel is a PyTorch module designed for generating captions using beam search and sampling methods. 
+SamplingBase is a PyTorch module designed for generating captions using beam search and sampling methods. 
 It supports diverse beam search and various sampling strategies for generating text sequences.
 
 Methods:
     __init__():
-        Initializes the CaptionModel instance.
+        Initializes the SamplingBase instance.
 
     forward(*args, **kwargs):
         Routes the call to the appropriate method based on the 'mode' keyword argument.
@@ -62,9 +62,9 @@ Attributes:
     eos_idx (int): Index of the end-of-sequence token.
 """
 
-class CaptionModel(nn.Module):
+class SamplingBase(nn.Module):
     def __init__(self):
-        super(CaptionModel, self).__init__()
+        super(SamplingBase, self).__init__()
 
     # implements beam search
     # calls beam_step and returns the final set of beams

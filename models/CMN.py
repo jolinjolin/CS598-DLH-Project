@@ -10,7 +10,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .att_model import pack_wrapper, AttModel
+from .att_base import pack_wrapper, AttBase
 
 """
 This module implements a Transformer-based architecture with memory querying and responding mechanisms
@@ -29,7 +29,7 @@ Classes:
     PositionwiseFeedForward: Implements a feed-forward network applied position-wise.
     Embeddings: Embeds input tokens into a dense vector space.
     PositionalEncoding: Adds positional information to token embeddings.
-    BaseCMN: A base class for the Cross-Modal Network (CMN) model, extending the AttModel class.
+    CMN: A base class for the Cross-Modal Network (CMN) model, extending the AttBase class.
 
 Functions:
     clones(module, N): Creates N identical copies of a given module.
@@ -340,7 +340,7 @@ class PositionalEncoding(nn.Module):
         return self.dropout(x)
 
 
-class BaseCMN(AttModel):
+class CMN(AttBase):
 
     def make_model(self, tgt_vocab, cmn):
         c = copy.deepcopy
@@ -358,7 +358,7 @@ class BaseCMN(AttModel):
         return model
 
     def __init__(self, args, tokenizer):
-        super(BaseCMN, self).__init__(args, tokenizer)
+        super(CMN, self).__init__(args, tokenizer)
         self.args = args
         self.num_layers = args.num_layers
         self.d_model = args.d_model
