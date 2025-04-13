@@ -10,7 +10,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .att_base import pack_wrapper, AttBase
+from .att_base import AttBase
 from .helpers import *
 
 """
