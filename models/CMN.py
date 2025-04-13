@@ -14,8 +14,8 @@ from .att_base import AttBase
 from .helpers import *
 
 """
-This module implements a Transformer-based architecture with memory querying and responding mechanisms
-for both textual and visual features. It includes classes and functions for building and training the model.
+This module implements a Transformer-based CMN architecture with memory querying and responding mechanisms
+for both textual and visual features.
 
 Classes:
     Transformer: Implements the Transformer model with encoder, decoder, and memory querying mechanisms.

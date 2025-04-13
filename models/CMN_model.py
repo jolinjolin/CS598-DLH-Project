@@ -7,6 +7,8 @@ from .R2Gen import R2Gen
 from utils.visual_extractor import VisualExtractor
 
 """
+This module is the interface for the CMN model, which is used for generating radiology reports from medical images.
+
 Classes:
     CMNModel(nn.Module):
         A model based on the CMN architecture for generating radiology reports. Similar to R2GenModel,

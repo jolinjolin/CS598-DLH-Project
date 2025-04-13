@@ -7,6 +7,8 @@ from .R2Gen import R2Gen
 from utils.visual_extractor import VisualExtractor
 
 """
+This module is the interface for the R2Gen model, which is used for generating radiology reports from medical images.
+
 Classes:
     R2GenModel(nn.Module):
         A model for generating radiology reports from medical images. It uses a visual extractor

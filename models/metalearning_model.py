@@ -4,6 +4,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 """
+    This module is the inferface for reinforcement learning modelm, which is used to optimize the learning process
+
     MetaLearningModel(nn.Module):
         A meta-learning model that uses an actor-critic architecture for optimizing a learning process.
         The actor predicts actions based on loss, and the critic predicts rewards for those actions.

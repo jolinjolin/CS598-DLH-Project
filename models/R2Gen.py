@@ -14,7 +14,7 @@ from .att_base import AttBase
 from .helpers import *
 
 """
-This module implements a Transformer-based Encoder-Decoder architecture with Relational Memory for sequence-to-sequence tasks.
+This module implements a Transformer-based R2Gen architecture with Relational Memory for sequence-to-sequence tasks.
 
 Classes:
     - Transformer: Implements the Transformer model with an encoder, decoder, embeddings, and relational memory.
