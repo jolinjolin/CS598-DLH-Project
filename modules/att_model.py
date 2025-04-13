@@ -10,6 +10,108 @@ from torch.nn.utils.rnn import PackedSequence, pack_padded_sequence, pad_packed_
 import modules.utils as utils
 from modules.caption_model import CaptionModel
 
+"""
+This module defines the `AttModel` class, which is a neural network model for generating captions 
+based on attention mechanisms. It also includes utility functions for handling packed sequences 
+and attention features.
+
+Classes:
+    - AttModel: A caption generation model that uses attention mechanisms.
+
+Functions:
+    - sort_pack_padded_sequence(input, lengths):
+        Sorts and packs a padded sequence for RNN processing.
+        Args:
+            input (Tensor): Input tensor of shape (batch_size, seq_len, ...).
+            lengths (Tensor): Lengths of each sequence in the batch.
+        Returns:
+            PackedSequence: Packed sequence for RNN processing.
+            Tensor: Indices to restore the original order.
+
+    - pad_unsort_packed_sequence(input, inv_ix):
+        Pads and unsorts a packed sequence back to its original order.
+        Args:
+            input (PackedSequence): Packed sequence to be unsorted.
+            inv_ix (Tensor): Indices to restore the original order.
+        Returns:
+            Tensor: Padded sequence in the original order.
+
+    - pack_wrapper(module, att_feats, att_masks):
+        Wraps a module to handle packed sequences for attention features.
+        Args:
+            module (nn.Module): The module to apply to the packed sequence.
+            att_feats (Tensor): Attention features.
+            att_masks (Tensor): Attention masks.
+        Returns:
+            Tensor: Output of the module applied to the attention features.
+
+Class `AttModel`:
+    - __init__(self, args, tokenizer):
+        Initializes the attention model with the given arguments and tokenizer.
+        Args:
+            args (Namespace): Model configuration arguments.
+            tokenizer (Tokenizer): Tokenizer object for vocabulary and token mappings.
+
+    - clip_att(self, att_feats, att_masks):
+        Clips the length of attention features and masks to the maximum length.
+        Args:
+            att_feats (Tensor): Attention features.
+            att_masks (Tensor): Attention masks.
+        Returns:
+            Tuple[Tensor, Tensor]: Clipped attention features and masks.
+
+    - _prepare_feature(self, fc_feats, att_feats, att_masks):
+        Prepares features for the model by embedding and projecting attention features.
+        Args:
+            fc_feats (Tensor): Fully connected features.
+            att_feats (Tensor): Attention features.
+            att_masks (Tensor): Attention masks.
+        Returns:
+            Tuple[Tensor, Tensor, Tensor, Tensor]: Processed features and masks.
+
+    - get_logprobs_state(self, it, fc_feats, att_feats, p_att_feats, att_masks, state, output_logsoftmax=1):
+        Computes log probabilities and updates the model state.
+        Args:
+            it (Tensor): Current input token indices.
+            fc_feats (Tensor): Fully connected features.
+            att_feats (Tensor): Attention features.
+            p_att_feats (Tensor): Projected attention features.
+            att_masks (Tensor): Attention masks.
+            state (Tuple): Current RNN state.
+            output_logsoftmax (int): Whether to apply log softmax to the output.
+        Returns:
+            Tuple[Tensor, Tuple]: Log probabilities and updated state.
+
+    - _sample_beam(self, fc_feats, att_feats, att_masks=None, opt={}):
+        Performs beam search to generate captions.
+        Args:
+            fc_feats (Tensor): Fully connected features.
+            att_feats (Tensor): Attention features.
+            att_masks (Tensor): Attention masks.
+            opt (dict): Options for beam search.
+        Returns:
+            Tuple[Tensor, Tensor]: Generated sequences and their log probabilities.
+
+    - _sample(self, fc_feats, att_feats, att_masks=None, update_opts={}):
+        Samples captions using the specified sampling method.
+        Args:
+            fc_feats (Tensor): Fully connected features.
+            att_feats (Tensor): Attention features.
+            att_masks (Tensor): Attention masks.
+            update_opts (dict): Options for sampling.
+        Returns:
+            Tuple[Tensor, Tensor]: Generated sequences and their log probabilities.
+
+    - _diverse_sample(self, fc_feats, att_feats, att_masks=None, opt={}):
+        Samples captions using diverse beam search.
+        Args:
+            fc_feats (Tensor): Fully connected features.
+            att_feats (Tensor): Attention features.
+            att_masks (Tensor): Attention masks.
+            opt (dict): Options for diverse sampling.
+        Returns:
+            Tuple[Tensor, Tensor]: Generated sequences and their log probabilities.
+"""
 
 def sort_pack_padded_sequence(input, lengths):
     sorted_lengths, indices = torch.sort(lengths, descending=True)

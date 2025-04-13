@@ -4,6 +4,46 @@ from torchvision import transforms
 from torch.utils.data import DataLoader
 from .datasets2 import IuxrayMultiImageDataset, MimiccxrSingleImageDataset
 
+"""
+R2DataLoader Class
+
+A custom DataLoader class for handling datasets and data loading for medical image datasets.
+
+Attributes:
+    args (Namespace): Arguments containing dataset configurations.
+    tokenizer (object): Tokenizer for processing text data.
+    split (str): Dataset split ('train', 'val', or 'test').
+    shuffle (bool): Whether to shuffle the data.
+    dataset_name (str): Name of the dataset ('iu_xray' or other).
+    batch_size (int): Number of samples per batch.
+    num_workers (int): Number of subprocesses to use for data loading.
+    transform (torchvision.transforms.Compose): Transformations applied to the images.
+    dataset (Dataset): Dataset object for the specified dataset.
+    init_kwargs (dict): Keyword arguments for initializing the DataLoader.
+
+Methods:
+    __init__(args, tokenizer, split, shuffle):
+        Initializes the R2DataLoader with the specified arguments and configurations.
+
+    collate_fn(data):
+        Custom collate function for batching data.
+        
+        Args:
+            data (list): List of samples from the dataset.
+        
+        Returns:
+            tuple: Batched data including:
+                - images_id (list): List of image IDs for the first dataset.
+                - images (torch.Tensor): Batched images for the first dataset.
+                - targets (torch.LongTensor): Batched target sequences for the first dataset.
+                - targets_masks (torch.FloatTensor): Batched target masks for the first dataset.
+                - images_id (list): List of image IDs for the first dataset (repeated).
+                - images_id2 (list): List of image IDs for the second dataset.
+                - images2 (torch.Tensor): Batched images for the second dataset.
+                - targets2 (torch.LongTensor): Batched target sequences for the second dataset.
+                - targets_masks2 (torch.FloatTensor): Batched target masks for the second dataset.
+                - images_id2 (list): List of image IDs for the second dataset (repeated).
+"""
 
 class R2DataLoader(DataLoader):
     def __init__(self, args, tokenizer, split, shuffle):

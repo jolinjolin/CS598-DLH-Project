@@ -8,6 +8,59 @@ import torch.nn.functional as F
 
 import modules.utils as utils
 
+"""
+CaptionModel is a PyTorch module designed for generating captions using beam search and sampling methods. 
+It supports diverse beam search and various sampling strategies for generating text sequences.
+
+Methods:
+    __init__():
+        Initializes the CaptionModel instance.
+
+    forward(*args, **kwargs):
+        Routes the call to the appropriate method based on the 'mode' keyword argument.
+
+    beam_search(init_state, init_logprobs, *args, **kwargs):
+        Performs diverse beam search to generate captions. It supports diversity augmentation, 
+        length penalty, and decoding constraints.
+
+        Args:
+            init_state (list): Initial state for the decoder.
+            init_logprobs (torch.Tensor): Initial log probabilities.
+            *args: Additional arguments for the decoder.
+            **kwargs: Additional keyword arguments, including options for beam search.
+
+        Returns:
+            list: A list of completed beams sorted by their log-probabilities.
+
+    old_beam_search(init_state, init_logprobs, *args, **kwargs):
+        Implements an older version of beam search for generating captions. 
+        Similar to `beam_search` but uses a different approach for diversity augmentation.
+
+        Args:
+            init_state (list): Initial state for the decoder.
+            init_logprobs (torch.Tensor): Initial log probabilities.
+            *args: Additional arguments for the decoder.
+            **kwargs: Additional keyword arguments, including options for beam search.
+
+        Returns:
+            list: A list of completed beams sorted by their log-probabilities.
+
+    sample_next_word(logprobs, sample_method, temperature):
+        Samples the next word based on the provided log probabilities and sampling method.
+
+        Args:
+            logprobs (torch.Tensor): Log probabilities of the vocabulary.
+            sample_method (str): Sampling method ('greedy', 'gumbel', 'top-k', or 'nucleus').
+            temperature (float): Temperature for sampling.
+
+        Returns:
+            tuple: A tuple containing the sampled word indices and their corresponding log probabilities.
+
+Attributes:
+    max_seq_length (int): Maximum sequence length for generated captions.
+    vocab_size (int): Size of the vocabulary.
+    eos_idx (int): Index of the end-of-sequence token.
+"""
 
 class CaptionModel(nn.Module):
     def __init__(self):

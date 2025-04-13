@@ -2,6 +2,41 @@ import torch
 import torch.nn as nn
 import torchvision.models as models
 
+"""
+VisualExtractor Module
+
+This module defines a PyTorch neural network model for extracting visual features 
+from input images using a pre-trained model from torchvision.
+
+Classes:
+    VisualExtractor: A PyTorch nn.Module that extracts patch-level and average 
+                     features from input images.
+
+Methods:
+    __init__(self, args):
+        Initializes the VisualExtractor module.
+        
+        Args:
+            args: An object containing the following attributes:
+                - visual_extractor (str): The name of the pre-trained model to use 
+                  (e.g., 'resnet50').
+                - visual_extractor_pretrained (bool): Whether to use a pre-trained 
+                  version of the model.
+
+    forward(self, images):
+        Performs a forward pass through the VisualExtractor module.
+        
+        Args:
+            images (torch.Tensor): A batch of input images with shape 
+                                   (batch_size, channels, height, width).
+        
+        Returns:
+            tuple:
+                - patch_feats (torch.Tensor): Patch-level features with shape 
+                  (batch_size, num_patches, feature_size).
+                - avg_feats (torch.Tensor): Average features with shape 
+                  (batch_size, feature_size).
+"""
 
 class VisualExtractor(nn.Module):
     def __init__(self, args):

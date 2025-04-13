@@ -1,6 +1,55 @@
 import torch
 from torch import optim
 
+"""
+This module provides various utilities for building and managing optimizers and learning rate schedulers
+for PyTorch models. It includes support for standard optimizers, custom learning rate schedulers, and
+specialized optimization techniques such as NoamOpt and ReduceLROnPlateau.
+
+Functions:
+----------
+- build_optimizer(args, model):
+    Constructs an optimizer for the given model based on the specified arguments.
+
+- build_lr_scheduler(args, optimizer):
+    Creates a learning rate scheduler for the given optimizer based on the specified arguments.
+
+- set_lr(optimizer, lr):
+    Sets the learning rate for all parameter groups in the optimizer.
+
+- get_lr(optimizer):
+    Retrieves the current learning rate from the optimizer.
+
+- get_std_opt(model, optim_func='adam', factor=1, warmup=2000):
+    Creates a NoamOpt optimizer for the given model with specified parameters.
+
+- build_noamopt_optimizer(args, model):
+    Constructs a NoamOpt optimizer for the encoder-decoder model and a standard optimizer for the visual extractor.
+
+- build_plateau_optimizer(args, model):
+    Constructs ReduceLROnPlateau optimizers for both the visual extractor and encoder-decoder model.
+
+Classes:
+--------
+- NoamOpt:
+    A custom optimizer wrapper that implements the Noam learning rate schedule.
+
+    Methods:
+    - step(): Updates parameters and learning rate.
+    - rate(step=None): Computes the learning rate based on the Noam schedule.
+    - state_dict(): Returns the state of the optimizer.
+    - load_state_dict(state_dict): Loads the state of the optimizer.
+
+- ReduceLROnPlateau:
+    A custom optimizer wrapper that integrates PyTorch's ReduceLROnPlateau scheduler.
+
+    Methods:
+    - step(): Updates parameters.
+    - scheduler_step(val): Updates the learning rate based on the scheduler and validation metric.
+    - state_dict(): Returns the state of the optimizer and scheduler.
+    - load_state_dict(state_dict): Loads the state of the optimizer and scheduler.
+    - rate(step=None): Placeholder for compatibility with NoamOpt.
+"""
 
 def build_optimizer(args, model):
     ve_params = list(map(id, model.visual_extractor.parameters()))

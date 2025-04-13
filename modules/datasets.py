@@ -5,6 +5,34 @@ import torch
 from PIL import Image
 from torch.utils.data import Dataset
 
+"""
+This module defines dataset classes for handling medical image datasets with associated reports.
+
+Classes:
+    BaseDataset:
+        A base class for datasets that handle medical images and their associated textual reports.
+        Attributes:
+            image_dir (str): Directory containing the images.
+            ann_path (str): Path to the annotation file (JSON format).
+            max_seq_length (int): Maximum sequence length for tokenized reports.
+            split (str): Dataset split (e.g., 'train', 'val', 'test').
+            tokenizer (callable): Tokenizer function for processing textual reports.
+            transform (callable, optional): Transformations to apply to images.
+            ann (dict): Parsed annotations from the JSON file.
+            examples (list): List of examples for the specified split.
+        Methods:
+            __len__(): Returns the number of examples in the dataset.
+
+    IuxrayMultiImageDataset(BaseDataset):
+        A dataset class for IU X-Ray data with multiple images per example.
+        Methods:
+            __getitem__(idx): Retrieves a sample consisting of two images, tokenized report, and metadata.
+
+    MimiccxrSingleImageDataset(BaseDataset):
+        A dataset class for MIMIC-CXR data with a single image per example.
+        Methods:
+            __getitem__(idx): Retrieves a sample consisting of one image, tokenized report, and metadata.
+"""
 
 class BaseDataset(Dataset):
     def __init__(self, args, tokenizer, split, transform=None):

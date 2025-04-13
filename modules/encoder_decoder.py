@@ -12,6 +12,45 @@ import torch.nn.functional as F
 
 from .att_model import pack_wrapper, AttModel
 
+"""
+This module implements a Transformer-based Encoder-Decoder architecture with Relational Memory for sequence-to-sequence tasks.
+
+Classes:
+    - Transformer: Implements the Transformer model with an encoder, decoder, embeddings, and relational memory.
+    - Encoder: Encodes the input sequence using multiple layers of self-attention and feed-forward networks.
+    - EncoderLayer: A single layer of the encoder with self-attention and feed-forward sublayers.
+    - SublayerConnection: Implements residual connections with layer normalization and dropout.
+    - LayerNorm: Applies layer normalization to stabilize training.
+    - Decoder: Decodes the target sequence using multiple layers of masked self-attention, encoder-decoder attention, and feed-forward networks.
+    - DecoderLayer: A single layer of the decoder with masked self-attention, encoder-decoder attention, and feed-forward sublayers.
+    - ConditionalSublayerConnection: A sublayer connection with conditional layer normalization based on relational memory.
+    - ConditionalLayerNorm: A layer normalization conditioned on relational memory.
+    - MultiHeadedAttention: Implements multi-headed attention for self-attention and encoder-decoder attention.
+    - PositionwiseFeedForward: Implements a feed-forward network applied to each position in the sequence.
+    - Embeddings: Embeds input tokens into a continuous vector space.
+    - PositionalEncoding: Adds positional information to the token embeddings.
+    - RelationalMemory: Implements a relational memory module for conditioning the decoder.
+    - EncoderDecoder: A wrapper class for the Transformer model, integrating it with an attention-based model.
+
+Functions:
+    - clones(module, N): Creates N identical copies of a given module.
+    - attention(query, key, value, mask=None, dropout=None): Computes scaled dot-product attention.
+    - subsequent_mask(size): Creates a mask to prevent attention to subsequent positions in the sequence.
+
+Key Features:
+    - The Transformer model uses multi-headed attention and feed-forward networks for both encoding and decoding.
+    - Relational Memory is integrated into the decoder to condition its outputs based on learned memory representations.
+    - Conditional Layer Normalization is used in the decoder to adapt normalization parameters based on relational memory.
+    - Positional encoding is added to embeddings to provide positional information to the model.
+    - The EncoderDecoder class provides a high-level interface for sequence-to-sequence tasks, including feature preparation and forward passes.
+
+Dependencies:
+    - PyTorch: The module relies on PyTorch for defining and training neural networks.
+    - NumPy: Used for creating masks and positional encodings.
+
+Usage:
+    This module is designed for sequence-to-sequence tasks such as machine translation, text summarization, and image captioning.
+"""
 
 def clones(module, N):
     return nn.ModuleList([copy.deepcopy(module) for _ in range(N)])

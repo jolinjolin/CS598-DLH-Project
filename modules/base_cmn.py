@@ -12,6 +12,45 @@ import torch.nn.functional as F
 
 from .att_model import pack_wrapper, AttModel
 
+"""
+This module implements a Transformer-based architecture with memory querying and responding mechanisms
+for both textual and visual features. It includes classes and functions for building and training the model.
+
+Classes:
+    Transformer: Implements the Transformer model with encoder, decoder, and memory querying mechanisms.
+    Encoder: Encodes the input sequence using multiple layers of self-attention and feed-forward networks.
+    LayerNorm: Applies layer normalization to stabilize training.
+    SublayerConnection: Implements residual connections with layer normalization and dropout.
+    EncoderLayer: A single layer of the encoder with self-attention and feed-forward sublayers.
+    Decoder: Decodes the target sequence using multiple layers of self-attention, source attention, and feed-forward networks.
+    DecoderLayer: A single layer of the decoder with self-attention, source attention, and feed-forward sublayers.
+    MultiThreadMemory: Implements memory querying and responding with multi-head attention for memory matrices.
+    MultiHeadedAttention: Implements standard multi-head attention for self-attention and source attention.
+    PositionwiseFeedForward: Implements a feed-forward network applied position-wise.
+    Embeddings: Embeds input tokens into a dense vector space.
+    PositionalEncoding: Adds positional information to token embeddings.
+    BaseCMN: A base class for the Cross-Modal Network (CMN) model, extending the AttModel class.
+
+Functions:
+    clones(module, N): Creates N identical copies of a given module.
+    subsequent_mask(size): Generates a mask to prevent attention to subsequent positions in a sequence.
+    attention(query, key, value, mask=None, dropout=None): Computes scaled dot-product attention.
+    memory_querying_responding(query, key, value, mask=None, dropout=None, topk=32): Implements memory querying and responding with top-k selection.
+
+Key Features:
+- Memory Querying and Responding: The model incorporates memory matrices for both textual and visual features,
+  enabling the model to query and respond to memory during encoding and decoding.
+- Multi-Head Attention: Supports both standard multi-head attention and memory-specific multi-thread attention.
+- Positional Encoding: Adds positional information to embeddings to capture sequence order.
+- Layer Normalization: Stabilizes training by normalizing inputs to each layer.
+- Residual Connections: Facilitates gradient flow and improves convergence.
+
+Usage:
+This module is designed for tasks involving sequence-to-sequence modeling with cross-modal memory mechanisms.
+It can be used for tasks such as machine translation, image captioning, or other applications requiring
+memory-augmented Transformer models.
+"""
+
 
 def clones(module, N):
     return nn.ModuleList([copy.deepcopy(module) for _ in range(N)])

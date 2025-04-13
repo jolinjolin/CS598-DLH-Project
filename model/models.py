@@ -6,6 +6,55 @@ from modules.base_cmn import BaseCMN
 from modules.visual_extractor import VisualExtractor
 from modules.encoder_decoder import EncoderDecoder
 
+"""
+This module defines three PyTorch models: R2GenModel, BaseCMNModel, and MetaLearning.
+
+Classes:
+    R2GenModel(nn.Module):
+        A model for generating radiology reports from medical images. It uses a visual extractor
+        and an encoder-decoder architecture. The forward method is dynamically set based on the dataset.
+
+        Methods:
+            __init__(args, tokenizer):
+                Initializes the R2GenModel with the given arguments and tokenizer.
+            __str__():
+                Returns a string representation of the model, including the number of trainable parameters.
+            forward_iu_xray(images, targets=None, mode='train'):
+                Forward pass for the IU X-Ray dataset. Processes paired images and generates outputs.
+            forward_mimic_cxr(images, targets=None, mode='train'):
+                Forward pass for the MIMIC-CXR dataset. Processes single images and generates outputs.
+
+    BaseCMNModel(nn.Module):
+        A model based on the BaseCMN architecture for generating radiology reports. Similar to R2GenModel,
+        but uses a different encoder-decoder module.
+
+        Methods:
+            __init__(args, tokenizer):
+                Initializes the BaseCMNModel with the given arguments and tokenizer.
+            __str__():
+                Returns a string representation of the model, including the number of trainable parameters.
+            forward_iu_xray(images, targets=None, mode='train', update_opts={}):
+                Forward pass for the IU X-Ray dataset. Processes paired images and generates outputs.
+            forward_mimic_cxr(images, targets=None, mode='train', update_opts={}):
+                Forward pass for the MIMIC-CXR dataset. Processes single images and generates outputs.
+
+    MetaLearning(nn.Module):
+        A meta-learning model that uses an actor-critic architecture for optimizing a learning process.
+        The actor predicts actions based on loss, and the critic predicts rewards for those actions.
+
+        Methods:
+            __init__(tokenizer):
+                Initializes the MetaLearning model with the given tokenizer.
+            predict_action(loss):
+                Predicts actions based on the input loss using the actor network. Returns the sampled actions
+                and their entropy.
+            predict_reward(loss, samples):
+                Predicts rewards for the given loss and sampled actions using the critic network.
+            learning(state, real_reward):
+                Performs a learning step for both the actor and critic networks using the given state
+                and real reward.
+"""
+
 class R2GenModel(nn.Module):
     def __init__(self, args, tokenizer):
         super(R2GenModel, self).__init__()

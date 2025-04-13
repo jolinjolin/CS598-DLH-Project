@@ -2,6 +2,83 @@ import json
 import re
 from collections import Counter
 
+"""
+Tokenizer class for processing and tokenizing medical reports.
+
+Attributes:
+    ann_path (str): Path to the annotation file containing training data.
+    threshold (int): Minimum frequency for a token to be included in the vocabulary.
+    dataset_name (str): Name of the dataset ('iu_xray' or other).
+    clean_report (function): Function to clean reports based on the dataset type.
+    ann (dict): Parsed JSON data from the annotation file.
+    token2idx (dict): Mapping from tokens to their corresponding indices.
+    idx2token (dict): Mapping from indices to their corresponding tokens.
+
+Methods:
+    create_vocabulary():
+        Creates a vocabulary from the training data based on token frequency.
+        Returns:
+            tuple: A tuple containing token2idx and idx2token dictionaries.
+
+    create_vocabulary2():
+        Alternative method to create a vocabulary, sorting tokens by frequency.
+        Returns:
+            tuple: A tuple containing token2idx and idx2token dictionaries.
+
+    clean_report_iu_xray(report):
+        Cleans and preprocesses a report specific to the 'iu_xray' dataset.
+        Args:
+            report (str): The report to be cleaned.
+        Returns:
+            str: The cleaned report.
+
+    clean_report_mimic_cxr(report):
+        Cleans and preprocesses a report specific to the 'mimic_cxr' dataset.
+        Args:
+            report (str): The report to be cleaned.
+        Returns:
+            str: The cleaned report.
+
+    get_token_by_id(id):
+        Retrieves the token corresponding to a given index.
+        Args:
+            id (int): The index of the token.
+        Returns:
+            str: The corresponding token.
+
+    get_id_by_token(token):
+        Retrieves the index corresponding to a given token.
+        Args:
+            token (str): The token to look up.
+        Returns:
+            int: The corresponding index, or the index of '<unk>' if not found.
+
+    get_vocab_size():
+        Retrieves the size of the vocabulary.
+        Returns:
+            int: The size of the vocabulary.
+
+    __call__(report):
+        Tokenizes a given report into a sequence of token indices.
+        Args:
+            report (str): The report to tokenize.
+        Returns:
+            list: A list of token indices, including start and end tokens.
+
+    decode(ids):
+        Decodes a sequence of token indices back into a string.
+        Args:
+            ids (list): A list of token indices.
+        Returns:
+            str: The decoded string.
+
+    decode_batch(ids_batch):
+        Decodes a batch of sequences of token indices back into strings.
+        Args:
+            ids_batch (list of lists): A batch of lists of token indices.
+        Returns:
+            list: A list of decoded strings.
+"""
 
 class Tokenizer(object):
     def __init__(self, args):

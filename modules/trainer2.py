@@ -9,6 +9,53 @@ import progressbar
 import numpy as np
 from models.models import MetaLearning
 
+"""
+This module contains the implementation of a base trainer class (`BaseTrainer`) and a derived trainer class (`Trainer`) 
+for training and evaluating machine learning models. The `BaseTrainer` class provides a generic framework for training 
+and evaluation, while the `Trainer` class extends it with specific implementations for a reinforcement learning-based 
+training process.
+Classes:
+    BaseTrainer:
+        A base class for training and evaluation of models. It includes methods for training, saving checkpoints, 
+        resuming from checkpoints, and monitoring performance metrics.
+        Methods:
+            __init__(model, model2, criterion, metric_ftns, optimizer, optimizer2, args, lr_scheduler, lr_scheduler2):
+                Initializes the trainer with models, optimizers, schedulers, and other configurations.
+            _train_epoch(epoch):
+                Abstract method to define the training logic for a single epoch. Must be implemented in derived classes.
+            train():
+                Executes the training process over multiple epochs, monitors performance, and saves checkpoints.
+            _record_best(log):
+                Records the best performance metrics for validation and test sets.
+            _print_best():
+                Logs the best performance metrics for validation and test sets.
+            _prepare_device(n_gpu_use):
+                Prepares the device (CPU/GPU) for training based on the number of GPUs available.
+            _save_checkpoint(epoch, save_best):
+                Saves the current model state and optimizer state as a checkpoint.
+            _resume_checkpoint(resume_path):
+                Loads a checkpoint to resume training from a specific epoch.
+    Trainer(BaseTrainer):
+        A derived class that implements the `_train_epoch` method for a reinforcement learning-based training process. 
+        It includes additional methods for reward calculation and evaluation.
+        Methods:
+            __init__(model, model2, criterion, metric_ftns, optimizer, optimizer2, args, lr_scheduler, lr_scheduler2, 
+                     train_dataloader, val_dataloader, test_dataloader):
+                Initializes the trainer with data loaders and other configurations.
+            _train_epoch(epoch):
+                Implements the training logic for a single epoch, including reinforcement learning-based updates.
+            reward(tgt, pre):
+                Calculates a reward score based on recall and precision for specific word groups.
+            imbalanced_eval(pre, tgt):
+                Evaluates the model's performance on imbalanced datasets by calculating recall and precision for 
+                specific word groups.
+            unlikelihood_loss(output, negative_word, mask):
+                Computes the unlikelihood loss to penalize the generation of undesired words.
+Usage:
+    This module is designed to be used as part of a larger machine learning pipeline. The `BaseTrainer` class can be 
+    extended to implement custom training logic, while the `Trainer` class provides a specific implementation for 
+    reinforcement learning-based training.
+"""
 
 class BaseTrainer(object):
     def __init__(self, model,model2, criterion, metric_ftns, optimizer, optimizer2 ,args, lr_scheduler,lr_scheduler2):

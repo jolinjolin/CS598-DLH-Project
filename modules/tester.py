@@ -10,6 +10,49 @@ import torch
 
 from modules.utils import generate_heatmap
 
+"""
+This module defines the `BaseTester` and `Tester` classes for evaluating machine learning models.
+
+Classes:
+    BaseTester:
+        Abstract base class for testing machine learning models. It provides methods for device preparation,
+        checkpoint loading, and abstract methods for testing and plotting.
+
+        Methods:
+            __init__(model, criterion, metric_ftns, args):
+                Initializes the BaseTester with the given model, loss function, metrics, and arguments.
+            test():
+                Abstract method to be implemented by subclasses for testing the model.
+            plot():
+                Abstract method to be implemented by subclasses for plotting results.
+            _prepare_device(n_gpu_use):
+                Prepares the device (CPU or GPU) for model execution based on the number of GPUs available.
+            _load_checkpoint(load_path):
+                Loads a model checkpoint from the specified path.
+
+    Tester:
+        Concrete implementation of the `BaseTester` class for testing and visualizing results of a model.
+
+        Methods:
+            __init__(model, criterion, metric_ftns, args, test_dataloader):
+                Initializes the Tester with the given model, loss function, metrics, arguments, and test dataloader.
+            test():
+                Evaluates the model on the test dataset and computes metrics.
+            plot():
+                Generates and saves attention weight visualizations and named entity recognition (NER) heatmaps
+                for the test dataset.
+
+Dependencies:
+    - logging
+    - os
+    - abc.abstractmethod
+    - cv2
+    - numpy
+    - spacy
+    - scispacy
+    - torch
+    - modules.utils.generate_heatmap
+"""
 
 class BaseTester(object):
     def __init__(self, model, criterion, metric_ftns, args):
