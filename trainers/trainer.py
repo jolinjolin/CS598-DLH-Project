@@ -4,7 +4,7 @@ from abc import abstractmethod
 import numpy as np
 import torch
 from numpy import inf
-from model.models import MetaLearning
+from models.models import MetaLearning
 import torch.nn.functional as F
 
 """

@@ -3,13 +3,13 @@ import argparse
 import numpy as np
 import torch
 
-from model.models import BaseCMNModel,  R2GenModel
-from modules.dataloader2 import R2DataLoader
-from modules.loss import compute_loss
-from modules.metrics import compute_scores
-from modules.optimizers import build_optimizer, build_lr_scheduler
-from modules.tokenizers import Tokenizer
-from modules.trainer import Trainer
+from models.models import BaseCMNModel,  R2GenModel
+from dataloaders.dataloader2 import R2DataLoader
+from trainers.loss import compute_loss
+from trainers.metrics import compute_scores
+from trainers.optimizers import build_optimizer, build_lr_scheduler
+from utils.tokenizers import Tokenizer
+from trainers.trainer import Trainer
 
 def preprogress(f):
     f = open(f)

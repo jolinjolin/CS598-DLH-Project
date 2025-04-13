@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-import modules.utils as utils
+import utils.utils as utils
 
 """
 CaptionModel is a PyTorch module designed for generating captions using beam search and sampling methods. 

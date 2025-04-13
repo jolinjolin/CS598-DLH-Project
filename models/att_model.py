@@ -7,8 +7,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.utils.rnn import PackedSequence, pack_padded_sequence, pad_packed_sequence
 
-import modules.utils as utils
-from modules.caption_model import CaptionModel
+import utils.utils as utils
+from .caption_model import CaptionModel
 
 """
 This module defines the `AttModel` class, which is a neural network model for generating captions 

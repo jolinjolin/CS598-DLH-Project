@@ -8,7 +8,7 @@ import spacy
 import scispacy
 import torch
 
-from modules.utils import generate_heatmap
+from utils.utils import generate_heatmap
 
 """
 This module defines the `BaseTester` and `Tester` classes for evaluating machine learning models.

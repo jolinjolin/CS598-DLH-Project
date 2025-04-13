@@ -2,9 +2,9 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from modules.base_cmn import BaseCMN
-from modules.visual_extractor import VisualExtractor
-from modules.encoder_decoder import EncoderDecoder
+from .base_cmn import BaseCMN
+from .encoder_decoder import EncoderDecoder
+from utils.visual_extractor import VisualExtractor
 
 """
 This module defines three PyTorch models: R2GenModel, BaseCMNModel, and MetaLearning.
