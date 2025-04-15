@@ -5,6 +5,48 @@ from torchvision import transforms
 
 from .datasets2 import IuxrayMultiImageDataset, MimiccxrSingleImageDataset
 
+"""
+This module defines the `R2DataLoader` class, which is a custom DataLoader for handling 
+medical image datasets (IU X-Ray and MIMIC-CXR) with specific preprocessing and batching logic.
+
+Classes:
+    - R2DataLoader: A custom DataLoader that handles dataset-specific preprocessing, 
+      batching, and collation for medical image datasets.
+
+Dependencies:
+    - numpy
+    - torch
+    - torchvision.transforms
+    - IuxrayMultiImageDataset (from .datasets2)
+    - MimiccxrSingleImageDataset (from .datasets2)
+
+Classes:
+    R2DataLoader:
+        A custom DataLoader for medical image datasets with specific transformations 
+        and collation logic.
+
+        Methods:
+            __init__(args, tokenizer, split, shuffle):
+                Initializes the DataLoader with dataset-specific configurations, 
+                transformations, and batching logic.
+
+            collate_fn(data):
+                Static method to collate a batch of data. It processes image IDs, 
+                images, report IDs, report masks, and sequence lengths into tensors 
+                suitable for model input.
+
+        Attributes:
+            args: Arguments containing dataset configurations (e.g., dataset name, batch size, etc.).
+            tokenizer: Tokenizer used for processing text data.
+            split: Dataset split ('train', 'val', or 'test').
+            shuffle: Boolean indicating whether to shuffle the data.
+            dataset_name: Name of the dataset ('iu_xray' or other).
+            batch_size: Number of samples per batch.
+            num_workers: Number of worker threads for data loading.
+            transform: Transformations applied to the images.
+            dataset: The dataset object (either IuxrayMultiImageDataset or MimiccxrSingleImageDataset).
+            init_kwargs: Dictionary of initialization arguments for the parent DataLoader class.
+"""
 
 class R2DataLoader(DataLoader):
     def __init__(self, args, tokenizer, split, shuffle):

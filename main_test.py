@@ -3,12 +3,12 @@ import argparse
 import numpy as np
 import torch
 
-from models.models import BaseCMNModel
-from modules.dataloaders import R2DataLoader
-from modules.loss import compute_loss
-from modules.metrics import compute_scores
-from modules.tokenizers import Tokenizer
-from modules.tester import Tester
+from models.CMN_model import CMNModel
+from dataloaders.dataloader import R2DataLoader
+from trainers.loss import compute_loss
+from trainers.metrics import compute_scores
+from utils.tokenizers import Tokenizer
+from trainers.tester import Tester
 
 
 def parse_agrs():
@@ -114,7 +114,7 @@ def main():
     test_dataloader = R2DataLoader(args, tokenizer, split='test', shuffle=False)
 
     # build model architecture
-    model = BaseCMNModel(args, tokenizer)
+    model = CMNModel(args, tokenizer)
 
     # get function handles of loss and metrics
     criterion = compute_loss

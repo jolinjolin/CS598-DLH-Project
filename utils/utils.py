@@ -2,6 +2,39 @@ import numpy as np
 import cv2
 import torch
 
+"""
+Utility functions for various tasks including penalty building, tensor manipulation, 
+and heatmap generation.
+
+Functions:
+----------
+penalty_builder(penalty_config: str) -> Callable:
+    Builds a penalty function based on the given configuration string.
+
+length_wu(length: float, logprobs: float, alpha: float = 0.) -> float:
+    Computes the length re-ranking score as described in "Google's Neural Machine 
+    Translation System".
+
+length_average(length: float, logprobs: float, alpha: float = 0.) -> float:
+    Computes the average probability of tokens in a sequence.
+
+split_tensors(n: int, x: Union[torch.Tensor, list, tuple, None]) -> Union[torch.Tensor, list, tuple, None]:
+    Splits a tensor or collection into `n` parts along the batch dimension.
+
+repeat_tensors(n: int, x: Union[torch.Tensor, list, tuple]) -> Union[torch.Tensor, list, tuple]:
+    Repeats a tensor or collection `n` times along the batch dimension.
+
+generate_heatmap(image: np.ndarray, weights: np.ndarray) -> np.ndarray:
+    Generates a heatmap overlay on an image using the given weights.
+
+Notes:
+------
+- The `penalty_builder` function supports two penalty types: 'wu' and 'avg'.
+- The `split_tensors` and `repeat_tensors` functions handle nested collections 
+  (lists or tuples) recursively.
+- The `generate_heatmap` function assumes the input image is in CHW format and 
+  converts it to HWC format for processing.
+"""
 
 def penalty_builder(penalty_config):
     if penalty_config == '':

@@ -5,6 +5,46 @@ from PIL import Image
 from torch.utils.data import Dataset
 import torch.nn.functional as F
 
+"""
+This module defines dataset classes for handling medical image datasets with associated reports.
+
+Classes:
+    BaseDataset:
+        A base dataset class that handles loading and preprocessing of data, including tokenization
+        of reports and preparation of masks and negative samples.
+
+    IuxrayMultiImageDataset:
+        A dataset class for handling IU X-Ray data with multiple images per example. Each example
+        contains two images, tokenized report IDs, masks, sequence lengths, and negative samples.
+
+    MimiccxrSingleImageDataset:
+        A dataset class for handling MIMIC-CXR data with a single image per example. Each example
+        contains one image, tokenized report IDs, masks, sequence lengths, and negative samples.
+
+Classes Details:
+    BaseDataset:
+        Methods:
+            __init__(self, args, tokenizer, split, transform=None):
+                Initializes the dataset with the given arguments, tokenizer, split, and optional
+                image transformations. Loads annotations and processes examples.
+
+            __len__(self):
+                Returns the number of examples in the dataset.
+
+    IuxrayMultiImageDataset(BaseDataset):
+        Methods:
+            __getitem__(self, idx):
+                Retrieves a pair of samples (current and adjacent) from the dataset. Each sample
+                includes two images, tokenized report IDs, masks, sequence lengths, and negative
+                samples.
+
+    MimiccxrSingleImageDataset(BaseDataset):
+        Methods:
+            __getitem__(self, idx):
+                Retrieves a pair of samples (current and adjacent) from the dataset. Each sample
+                includes one image, tokenized report IDs, masks, sequence lengths, and negative
+                samples.
+"""
 
 class BaseDataset(Dataset):
     def __init__(self, args, tokenizer, split, transform=None):

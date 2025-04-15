@@ -10,29 +10,43 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .att_model import pack_wrapper, AttModel
+from .att_base import AttBase
+from .helpers import *
 
+"""
+This module implements a Transformer-based R2Gen architecture with Relational Memory for sequence-to-sequence tasks.
 
-def clones(module, N):
-    return nn.ModuleList([copy.deepcopy(module) for _ in range(N)])
+Classes:
+    - Transformer: Implements the Transformer model with an encoder, decoder, embeddings, and relational memory.
+    - Encoder: Encodes the input sequence using multiple layers of self-attention and feed-forward networks.
+    - EncoderLayer: A single layer of the encoder with self-attention and feed-forward sublayers.
+    - SublayerConnection: Implements residual connections with layer normalization and dropout.
+    - LayerNorm: Applies layer normalization to stabilize training.
+    - Decoder: Decodes the target sequence using multiple layers of masked self-attention, encoder-decoder attention, and feed-forward networks.
+    - DecoderLayer: A single layer of the decoder with masked self-attention, encoder-decoder attention, and feed-forward sublayers.
+    - ConditionalSublayerConnection: A sublayer connection with conditional layer normalization based on relational memory.
+    - ConditionalLayerNorm: A layer normalization conditioned on relational memory.
+    - MultiHeadedAttention: Implements multi-headed attention for self-attention and encoder-decoder attention.
+    - PositionwiseFeedForward: Implements a feed-forward network applied to each position in the sequence.
+    - Embeddings: Embeds input tokens into a continuous vector space.
+    - PositionalEncoding: Adds positional information to the token embeddings.
+    - RelationalMemory: Implements a relational memory module for conditioning the decoder.
+    - R2Gen: A wrapper class for the Transformer model, integrating it with an attention-based model.
 
+Key Features:
+    - The Transformer model uses multi-headed attention and feed-forward networks for both encoding and decoding.
+    - Relational Memory is integrated into the decoder to condition its outputs based on learned memory representations.
+    - Conditional Layer Normalization is used in the decoder to adapt normalization parameters based on relational memory.
+    - Positional encoding is added to embeddings to provide positional information to the model.
+    - The R2Gen class provides a high-level interface for sequence-to-sequence tasks, including feature preparation and forward passes.
 
-def attention(query, key, value, mask=None, dropout=None):
-    d_k = query.size(-1)
-    scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
-    if mask is not None:
-        scores = scores.masked_fill(mask == 0, -1e9)
-    p_attn = F.softmax(scores, dim=-1)
-    if dropout is not None:
-        p_attn = dropout(p_attn)
-    return torch.matmul(p_attn, value), p_attn
+Dependencies:
+    - PyTorch: The module relies on PyTorch for defining and training neural networks.
+    - NumPy: Used for creating masks and positional encodings.
 
-
-def subsequent_mask(size):
-    attn_shape = (1, size, size)
-    subsequent_mask = np.triu(np.ones(attn_shape), k=1).astype('uint8')
-    return torch.from_numpy(subsequent_mask) == 0
-
+Usage:
+    This module is designed for sequence-to-sequence tasks such as machine translation, text summarization, and image captioning.
+"""
 
 class Transformer(nn.Module):
     def __init__(self, encoder, decoder, src_embed, tgt_embed, rm):
@@ -300,7 +314,7 @@ class RelationalMemory(nn.Module):
         return outputs
 
 
-class EncoderDecoder(AttModel):
+class R2Gen(AttBase):
 
     def make_model(self, tgt_vocab):
         c = copy.deepcopy
@@ -322,7 +336,7 @@ class EncoderDecoder(AttModel):
         return model
 
     def __init__(self, args, tokenizer):
-        super(EncoderDecoder, self).__init__(args, tokenizer)
+        super(R2Gen, self).__init__(args, tokenizer)
         self.args = args
         self.num_layers = args.num_layers
         self.d_model = args.d_model

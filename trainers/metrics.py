@@ -1,9 +1,50 @@
 from sklearn.metrics import roc_auc_score, f1_score, recall_score, precision_score
-
 from pycocoevalcap.bleu.bleu import Bleu
 from pycocoevalcap.meteor import Meteor
 from pycocoevalcap.rouge import Rouge
 
+"""
+This module provides functions and a class for evaluating machine learning models using various metrics.
+
+Functions:
+----------
+1. compute_scores(gts, res):
+    Performs the MS COCO evaluation using the Python 3 implementation of pycocoevalcap.
+    Parameters:
+        - gts (dict): Dictionary with the image IDs and their gold captions.
+        - res (dict): Dictionary with the image IDs and their generated captions.
+    Returns:
+        - eval_res (dict): A dictionary containing evaluation scores for BLEU, METEOR, and ROUGE_L metrics.
+
+2. compute_mlc(gt, pred, label_set):
+    Computes multi-label classification metrics such as AUC-ROC, F1-score, recall, and precision.
+    Parameters:
+        - gt (numpy.ndarray): Ground truth binary matrix of shape (n_samples, n_labels).
+        - pred (numpy.ndarray): Predicted binary matrix of shape (n_samples, n_labels).
+        - label_set (list): List of label names corresponding to the columns of the matrices.
+    Returns:
+        - res_mlc (dict): A dictionary containing AUC-ROC scores for each label, average AUC-ROC, 
+                          and macro/micro F1, recall, and precision scores.
+
+Classes:
+--------
+1. MetricWrapper:
+    A wrapper class for combining MS COCO evaluation metrics and multi-label classification metrics.
+    Methods:
+        - __init__(label_set):
+            Initializes the MetricWrapper with a given set of labels.
+            Parameters:
+                - label_set (list): List of label names.
+        - __call__(gts, res, gts_mlc, res_mlc):
+            Computes and combines MS COCO evaluation metrics and multi-label classification metrics.
+            Parameters:
+                - gts (dict): Dictionary with the image IDs and their gold captions.
+                - res (dict): Dictionary with the image IDs and their generated captions.
+                - gts_mlc (numpy.ndarray): Ground truth binary matrix for multi-label classification.
+                - res_mlc (numpy.ndarray): Predicted binary matrix for multi-label classification.
+            Returns:
+                - eval_res (dict): A dictionary containing all computed evaluation metrics.
+"""
 
 def compute_scores(gts, res):
     """

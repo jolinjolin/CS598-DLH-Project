@@ -4,9 +4,57 @@ from abc import abstractmethod
 import numpy as np
 import torch
 from numpy import inf
-from model.models import MetaLearning
+from models.metalearning_model import MetaLearningModel
 import torch.nn.functional as F
 
+"""
+trainer.py
+This module contains the implementation of the `BaseTrainer` and `Trainer` classes for training deep learning models
+with support for meta-learning and reinforcement learning optimization.
+Classes:
+    - BaseTrainer: Abstract base class for training models, providing common functionality such as checkpointing,
+      device preparation, and training loop management.
+    - Trainer: Concrete implementation of `BaseTrainer` that includes specific training logic for a model with
+      meta-learning and reinforcement learning components.
+BaseTrainer:
+    Methods:
+        - __init__(model, criterion, metric_ftns, optimizer, args, lr_scheduler):
+            Initializes the trainer with the given model, loss function, metrics, optimizer, arguments, and learning
+            rate scheduler.
+        - _train_epoch(epoch):
+            Abstract method to be implemented by subclasses for training logic in a single epoch.
+        - train():
+            Executes the training loop over the specified number of epochs, including validation and checkpointing.
+        - _record_best(log):
+            Records the best validation and test metrics during training.
+        - _print_best():
+            Logs the best validation and test results.
+        - _prepare_device(n_gpu_use):
+            Prepares the device (CPU/GPU) for training and returns the device and list of GPU IDs.
+        - _save_checkpoint(epoch, save_best=False):
+            Saves the current model checkpoint and optionally saves the best model checkpoint.
+        - _resume_checkpoint(resume_path):
+            Resumes training from a saved checkpoint.
+Trainer (inherits from BaseTrainer):
+    Methods:
+        - __init__(model, criterion, metric_ftns, optimizer, args, lr_scheduler, train_dataloader, val_dataloader, test_dataloader):
+            Initializes the trainer with additional dataloaders for training, validation, and testing.
+        - _train_epoch(epoch):
+            Implements the training logic for a single epoch, including meta-learning and reinforcement learning
+            optimization.
+        - reward(tgt, pre):
+            Computes a reward score based on recall and precision for specific word groups.
+        - imbalanced_eval(pre, tgt, n):
+            Evaluates the model's performance on imbalanced data by calculating recall and precision for word groups.
+        - unlikelihood_loss(output, negative_word, mask):
+            Computes the unlikelihood loss to penalize undesired predictions.
+        - _train_epoch2(epoch):
+            Alternative training logic for a single epoch without meta-learning and reinforcement learning.
+Notes:
+    - The `BaseTrainer` class is designed to be extended for specific training implementations.
+    - The `Trainer` class includes advanced training techniques such as meta-learning and reinforcement learning
+      for optimizing the model.
+"""
 class BaseTrainer(object):
     def __init__(self, model, criterion, metric_ftns, optimizer, args, lr_scheduler):
         self.args = args
@@ -18,7 +66,7 @@ class BaseTrainer(object):
         # setup GPU device if available, move model into configured device
         self.device, device_ids = self._prepare_device(args.n_gpu)
         self.model = model.to(self.device)
-        self.metaRL = MetaLearning(model.tokenizer).to(self.device)
+        self.metaRL = MetaLearningModel(model.tokenizer).to(self.device)
         self.metarl_opt = torch.optim.Adam(self.metaRL.parameters(), lr=0.001, betas=(0.9, 0.99), eps=0.0000001)
 
         if len(device_ids) > 1:
