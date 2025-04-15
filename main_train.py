@@ -69,17 +69,24 @@ def parse_agrs():
     parser = argparse.ArgumentParser()
 
     # Data input settings
-    '''
-    parser.add_argument('--image_dir', type=str, default='data/iu_xray/images/',
-                        help='the path to the directory containing the data.')
-    parser.add_argument('--ann_path', type=str, default='data/iu_xray/annotation.json',
-                        help='the path to the directory containing the data.')
-    '''
-    parser.add_argument('--image_dir', type=str, default='/home/ywu10/Documents/R2Gen/data/iu_xray/images', help='the path to the directory containing the data.')
-    parser.add_argument('--ann_path', type=str, default='/home/ywu10/Documents/R2Gen/data/iu_xray/annotation.json', help='the path to the directory containing the data.')
-    #parser.add_argument('--image_dir', type=str, default='/home/ywu10/Documents/R2Gen/data/mimic_cxr/images', help='the path to the directory containing the data.')
-    #parser.add_argument('--ann_path', type=str, default='/home/ywu10/Documents/R2Gen/data/mimic_cxr/annotation.json', help='the path to the directory containing the data.')
-
+    # '''
+    parser.add_argument(
+        "--image_dir",
+        type=str,
+        default="data/iu_xray/images/",
+        help="the path to the directory containing the data.",
+    )
+    parser.add_argument(
+        "--ann_path",
+        type=str,
+        default="data/iu_xray/annotation.json",
+        help="the path to the directory containing the data.",
+    )
+    # '''
+    # parser.add_argument('--image_dir', type=str, default='./R2Gen/data/iu_xray/images', help='the path to the directory containing the data.')
+    # parser.add_argument('--ann_path', type=str, default='./R2Gen/data/iu_xray/annotation.json', help='the path to the directory containing the data.')
+    # parser.add_argument('--image_dir', type=str, default='./R2Gen/data/mimic_cxr/images', help='the path to the directory containing the data.')
+    # parser.add_argument('--ann_path', type=str, default='./R2Gen/data/mimic_cxr/annotation.json', help='the path to the directory containing the data.')
 
 # Data loader settings
     parser.add_argument('--dataset_name', type=str, default='iu_xray', choices=['iu_xray', 'mimic_cxr'],
@@ -159,6 +166,7 @@ def parse_agrs():
     parser.add_argument('--resume', type=str, help='whether to resume the training from existing checkpoints.')
 
     args = parser.parse_args()
+    print(args)
     return args
 
 
