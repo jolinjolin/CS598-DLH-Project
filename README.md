@@ -3,9 +3,28 @@
 
 This is the CS598 DLH Project to replicate TIMER model (Token Imbalance Adaptation for Radiology Report Generation)
 
-## References
+## Paper & Code
+- TIMER
+    - Paper: [Token Imbalance Adaptation for Radiology Report Generation](https://arxiv.org/abs/2304.09185).
+    - Code: [TIMER](https://github.com/woqingdoua/TIMER).
 
-The original codebase is accesible at [github](https://github.com/woqingdoua/TIMER) and the published paper can be found at [Token Imbalance Adaptation for Radiology Report Generation](https://arxiv.org/abs/2304.09185)
+TIMER's architecture and implementation build upon the following baseline models (as evaluated in the TIMER paper):
+
+- BiLSTM 
+    - Paper: [Show, Describe and Conclude: On Exploiting the Structure Information of Chest X-ray Reports](https://aclanthology.org/P19-1657/)
+    - Code: no public codebase
+
+- R2Gen
+    - Paper: [Generating radiology reports via memory-driven transformer](https://arxiv.org/abs/2010.16056)
+    - Code: [R2Gen](https://github.com/cuhksz-nlp/R2Gen)
+
+- CMN
+    - Paper: [Cross-modal Memory Networks for Radiology Report Generation](https://arxiv.org/abs/2204.13258)
+    - Code: [CMN](https://github.com/zhjohnchan/R2GenCMN)
+
+- CMM+RL
+    - Paper: [Reinforced Cross-modal Alignment for Radiology Report Generation](https://aclanthology.org/2022.findings-acl.38/)
+    - Code: [CMM+RL](https://github.com/synlp/R2GenRL)
 
 ## Denpendencies
 ### Install using conda
