@@ -1,4 +1,4 @@
-python main_train.py\
+python tasks/train_CMN.py\
     --dataset_name iu_xray \
     --max_seq_length 60 \
     --threshold 3 \
@@ -14,5 +14,5 @@ python main_train.py\
     --cmm_dim 512 \
     --seed 7580 \
     --beam_size 3 \
-    --save_dir results/iu_xray/ \
+    --save_dir results/iu_xray_CMN/ \
     --log_period 50

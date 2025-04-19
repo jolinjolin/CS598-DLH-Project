@@ -1,4 +1,4 @@
-python main_train2.py \
+python tasks/train2.py \
     --dataset_name mimic_cxr \
     --max_seq_length 100 \
     --threshold 10 \

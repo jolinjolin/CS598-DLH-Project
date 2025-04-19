@@ -1,4 +1,4 @@
-python main_plot.py \
+python tasks/plot.py \
     --image_dir data/mimic_cxr/images/ \
     --ann_path data/mimic_cxr/annotation.json \
     --dataset_name mimic_cxr \

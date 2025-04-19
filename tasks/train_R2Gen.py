@@ -3,66 +3,13 @@ import argparse
 import numpy as np
 import torch
 
-from models.CMN_model import CMNModel
 from models.R2Gen_model import R2GenModel
 from dataloaders.dataloader2 import R2DataLoader
 from trainers.loss import compute_loss
 from trainers.metrics import compute_scores
 from trainers.optimizers import build_optimizer, build_lr_scheduler
-from trainers.trainer import Trainer
+from trainers.trainer_non_rl import TrainerNonRL
 from utils.tokenizers import Tokenizer
-
-def preprogress(f):
-    f = open(f)
-    max_lenn = 76332
-    line1 = f.readline()
-    gt = []
-    i = 0
-    while i<max_lenn:
-        line1 = line1.split( )
-        try:
-            if line1[0] == 'Findings:':
-                line1 = line1[1:]
-                gt.append(' '.join(line1))
-            i += 1
-            line1 = f.readline()
-        except:
-            i += 1
-            line1 = f.readline()
-            pass
-    f.close()
-    return gt
-
-#gt = preprogress('/home/ywu10/Documents/multimodel/results/1run_gt_results_2022-04-24-23-18.txt')
-#pre = preprogress('/home/ywu10/Documents/multimodel/results/1run_pre_results_2022-04-24-23-18.txt')
-
-def imbalanced_eval(pre,tgt,words):
-
-    words = [i for i in words.token2idx][:-2]
-    recall_ = []
-    precision_ = []
-    right_ = []
-    gap = len(words)//8
-
-    for index in range(0,len(words)-gap,gap):
-        right = 0
-        recall = 0
-        precision = 0
-        for i in range(len(tgt)):
-            a = [j for j in tgt[i].split() if j in words[index:index+gap]]
-            b = [j for j in pre[i].split() if j in words[index:index+gap]]
-            right += min(len([j for j in a if j in b]),len([j for j in b if j in a]))
-            recall += len(a)
-            precision += len(b)
-        recall_.append(recall)
-        precision_.append(precision)
-        right_.append(right)
-    print(f'recall:{np.array(right_)/np.array(recall_)}')
-    print(f'precision:{np.array(right_)/np.array(precision_)}')
-    print(precision_)
-    print(recall_)
-
-
 
 
 def parse_agrs():
@@ -189,25 +136,18 @@ def main():
     test_dataloader = R2DataLoader(args, tokenizer, split='test', shuffle=False)
 
     # build model architecture
-    #model = CMNModel(args, tokenizer)
     model = R2GenModel(args, tokenizer)
 
     # get function handles of loss and metrics
     criterion = compute_loss
     metrics = compute_scores
 
-    #imbalanced_eval(pre,gt,model.tokenizer)
-    #val_met =  metrics({i: [gt] for i, gt in enumerate(gt)},
-    #                           {i: [re] for i, re in enumerate(pre)})
-
-    #print(val_met)
-
     # build optimizer, learning rate scheduler
     optimizer = build_optimizer(args, model)
     lr_scheduler = build_lr_scheduler(args, optimizer)
 
     # build trainer and start to train
-    trainer = Trainer(model, criterion, metrics, optimizer, args, lr_scheduler, train_dataloader, val_dataloader, test_dataloader)
+    trainer = TrainerNonRL(model, criterion, metrics, optimizer, args, lr_scheduler, train_dataloader, val_dataloader, test_dataloader)
     trainer.train()
 
 
