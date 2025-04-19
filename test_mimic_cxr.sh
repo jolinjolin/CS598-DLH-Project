@@ -1,4 +1,4 @@
-python main_test.py \
+python tasks/test.py \
     --image_dir data/mimic_cxr/images/ \
     --ann_path data/mimic_cxr/annotation.json \
     --dataset_name mimic_cxr \

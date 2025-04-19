@@ -1,4 +1,4 @@
-python train_TIMER.py\
+python tasks/train_TIMER.py\
     --dataset_name iu_xray \
     --max_seq_length 60 \
     --threshold 3 \
