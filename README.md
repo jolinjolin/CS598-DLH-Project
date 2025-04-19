@@ -38,6 +38,13 @@ conda install pytorch==1.7.1 torchvision==0.8.2 torchaudio==0.7.2 cudatoolkit=11
 pip install -r requirements.txt
 ```
 
+## Run
+###
+Run a task
+```
+bash <task>.sh
+```
+
 ## Datasets
 We use two datasets (IU X-Ray and MIMIC-CXR) in our paper.
 
