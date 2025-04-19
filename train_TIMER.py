@@ -9,7 +9,7 @@ from dataloaders.dataloader2 import R2DataLoader
 from trainers.loss import compute_loss
 from trainers.metrics import compute_scores
 from trainers.optimizers import build_optimizer, build_lr_scheduler
-from trainers.trainer import Trainer
+from trainers.trainer_rl import TrainerRL
 from utils.tokenizers import Tokenizer
 
 def preprogress(f):
@@ -207,7 +207,7 @@ def main():
     lr_scheduler = build_lr_scheduler(args, optimizer)
 
     # build trainer and start to train
-    trainer = Trainer(model, criterion, metrics, optimizer, args, lr_scheduler, train_dataloader, val_dataloader, test_dataloader)
+    trainer = TrainerRL(model, criterion, metrics, optimizer, args, lr_scheduler, train_dataloader, val_dataloader, test_dataloader)
     trainer.train()
 
 
