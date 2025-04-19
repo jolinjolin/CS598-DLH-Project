@@ -1,4 +1,4 @@
-python tasks/train_TIMER.py\
+python tasks/train_CMM_RL.py\
     --dataset_name iu_xray \
     --max_seq_length 60 \
     --threshold 3 \
@@ -14,5 +14,5 @@ python tasks/train_TIMER.py\
     --cmm_dim 512 \
     --seed 7580 \
     --beam_size 3 \
-    --save_dir results/iu_xray_TIMER/ \
+    --save_dir results/iu_xray_CMM_RL/ \
     --log_period 50
