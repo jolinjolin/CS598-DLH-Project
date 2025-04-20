@@ -42,16 +42,6 @@ Classes:
                 Generates and saves attention weight visualizations and named entity recognition (NER) heatmaps
                 for the test dataset.
 
-Dependencies:
-    - logging
-    - os
-    - abc.abstractmethod
-    - cv2
-    - numpy
-    - spacy
-    - scispacy
-    - torch
-    - modules.utils.generate_heatmap
 """
 
 class BaseTester(object):
@@ -104,6 +94,11 @@ class BaseTester(object):
         self.logger.info("Loading checkpoint: {} ...".format(load_path))
         checkpoint = torch.load(load_path)
         self.model.load_state_dict(checkpoint['state_dict'])
+    
+    def _save_reports(self, report, file_path):
+        with open(file_path, 'a') as f:
+            for i, r in enumerate(report):
+                f.write(f'{r}\n')
 
 
 class Tester(BaseTester):
@@ -117,14 +112,17 @@ class Tester(BaseTester):
         log = dict()
         with torch.no_grad():
             test_gts, test_res = [], []
-            for batch_idx, (images_id, images, reports_ids, reports_masks) in enumerate(self.test_dataloader):
+            for bbatch_idx, (images_id, images, reports_ids, reports_masks, _,_,_,_,_,_) in enumerate(self.test_dataloader):
                 images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(
                     self.device), reports_masks.to(self.device)
-                output, _ = self.model(images, mode='sample')
+                output = self.model(images, mode='sample')
                 reports = self.model.tokenizer.decode_batch(output.cpu().numpy())
                 ground_truths = self.model.tokenizer.decode_batch(reports_ids[:, 1:].cpu().numpy())
                 test_res.extend(reports)
                 test_gts.extend(ground_truths)
+                if self.args.save_report:
+                    self._save_reports(reports, os.path.join(self.save_dir, "preds.csv"))
+                    self._save_reports(ground_truths, os.path.join(self.save_dir, "ground_truths.csv"))
 
             test_met = self.metric_ftns({i: [gt] for i, gt in enumerate(test_gts)},
                                         {i: [re] for i, re in enumerate(test_res)})
@@ -145,10 +143,10 @@ class Tester(BaseTester):
 
         self.model.eval()
         with torch.no_grad():
-            for batch_idx, (images_id, images, reports_ids, reports_masks) in enumerate(self.test_dataloader):
+            for batch_idx, (images_id, images, reports_ids, reports_masks, _,_,_,_,_,_) in enumerate(self.test_dataloader):
                 images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(
                     self.device), reports_masks.to(self.device)
-                output, _ = self.model(images, mode='sample')
+                output = self.model(images, mode='sample')
                 image = torch.clamp((images[0].cpu() * std + mean) * 255, 0, 255).int().cpu().numpy()
                 report = self.model.tokenizer.decode_batch(output.cpu().numpy())[0].split()
 

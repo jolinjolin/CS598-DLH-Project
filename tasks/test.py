@@ -5,11 +5,13 @@ import numpy as np
 import torch
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from models.CMN_model import CMNModel
-from dataloaders.dataloader import R2DataLoader
+from models.R2Gen_model import R2GenModel
+from dataloaders.dataloader2 import R2DataLoader
 from trainers.loss import compute_loss
-from trainers.metrics import compute_scores
+from trainers.metrics import compute_scores, compute_mlc
 from utils.tokenizers import Tokenizer
 from trainers.tester import Tester
+from tasks.imbalanced_eval import preprogress, imbalanced_eval
 
 
 def parse_agrs():
@@ -46,6 +48,11 @@ def parse_agrs():
     parser.add_argument('--pad_idx', type=int, default=0, help='the index of <pad>.')
     parser.add_argument('--use_bn', type=int, default=0, help='whether to use batch normalization.')
     parser.add_argument('--drop_prob_lm', type=float, default=0.5, help='the dropout rate of the output layer.')
+
+    # for Relational Memory
+    parser.add_argument('--rm_num_slots', type=int, default=3, help='the number of memory slots.')
+    parser.add_argument('--rm_num_heads', type=int, default=8, help='the numebr of heads in rm.')
+    parser.add_argument('--rm_d_model', type=int, default=512, help='the dimension of rm.')
 
     # for Cross-modal Memory
     parser.add_argument('--topk', type=int, default=32, help='the number of k.')
@@ -93,6 +100,7 @@ def parse_agrs():
     parser.add_argument('--seed', type=int, default=9233, help='.')
     parser.add_argument('--resume', type=str, help='whether to resume the training from existing checkpoints.')
     parser.add_argument('--load', type=str, help='whether to load the pre-trained model.')
+    parser.add_argument('--save_report', action='store_true', help='whether to save the reports.')
 
     args = parser.parse_args()
     return args
@@ -115,7 +123,8 @@ def main():
     test_dataloader = R2DataLoader(args, tokenizer, split='test', shuffle=False)
 
     # build model architecture
-    model = CMNModel(args, tokenizer)
+    # model = CMNModel(args, tokenizer)
+    model = R2GenModel(args, tokenizer)
 
     # get function handles of loss and metrics
     criterion = compute_loss
