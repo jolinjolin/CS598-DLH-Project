@@ -1,8 +1,9 @@
 import argparse
-
+import os
+import sys
 import numpy as np
 import torch
-
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from models.CMN_model import CMNModel
 from models.R2Gen_model import R2GenModel
 from dataloaders.dataloader2 import R2DataLoader
