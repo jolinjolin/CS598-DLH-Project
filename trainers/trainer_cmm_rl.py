@@ -4,7 +4,7 @@ import os
 import time
 from abc import abstractmethod
 import numpy as np
-import pandas as pd
+# import pandas as pd
 import torch
 from numpy import inf
 
@@ -119,7 +119,7 @@ class BaseTrainerCMMRL(object):
             log = {'epoch': epoch}
             log.update(result)
             self._record_best(log)
-            self._print_to_file(log)
+            # self._print_to_file(log)
 
             # print logged informations to the screen
             for key, value in log.items():
@@ -168,23 +168,23 @@ class BaseTrainerCMMRL(object):
         if improved_test:
             self.best_recorder['test'].update(log)
 
-    def _print_to_file(self, log):
-        crt_time = time.asctime(time.localtime(time.time()))
-        log['time'] = crt_time
-        log['seed'] = self.args.seed
-        log['best_model_from'] = 'train'
+    # def _print_to_file(self, log):
+    #     crt_time = time.asctime(time.localtime(time.time()))
+    #     log['time'] = crt_time
+    #     log['seed'] = self.args.seed
+    #     log['best_model_from'] = 'train'
 
-        if not os.path.exists(self.args.record_dir):
-            os.makedirs(self.args.record_dir)
-        record_path = os.path.join(self.args.record_dir, self.args.dataset_name + '_seed_' + str(self.args.seed) + '.csv')
-        if not os.path.exists(record_path):
-            record_table = pd.DataFrame()
-        else:
-            record_table = pd.read_csv(record_path)
-        tmp_log = copy.deepcopy(log)
-        tmp_log.update(**self.args.__dict__)
-        record_table = record_table.append(tmp_log, ignore_index=True)
-        record_table.to_csv(record_path, index=False)
+    #     if not os.path.exists(self.args.record_dir):
+    #         os.makedirs(self.args.record_dir)
+    #     record_path = os.path.join(self.args.record_dir, self.args.dataset_name + '_seed_' + str(self.args.seed) + '.csv')
+    #     if not os.path.exists(record_path):
+    #         record_table = pd.DataFrame()
+    #     else:
+    #         record_table = pd.read_csv(record_path)
+    #     tmp_log = copy.deepcopy(log)
+    #     tmp_log.update(**self.args.__dict__)
+    #     record_table = record_table.append(tmp_log, ignore_index=True)
+    #     record_table.to_csv(record_path, index=False)
 
     def _print_best(self):
         self.logger.info('Best results (w.r.t {}) in validation set:'.format(self.args.monitor_metric))
@@ -273,7 +273,7 @@ class TrainerCMMRL(BaseTrainerCMMRL):
         self.logger.info('[{}/{}] Start to train in the training set.'.format(epoch, self.epochs))
         train_loss = 0
         self.model.train()
-        for batch_idx, (images_id, images, reports_ids, reports_masks) in enumerate(self.train_dataloader):
+        for batch_idx, (images_id, images, reports_ids, reports_masks, _,_,_,_,_,_) in enumerate(self.train_dataloader):
 
             iteration = batch_idx + (epoch - 1) * len(self.train_dataloader)
             # self._set_lr_ed(iteration)
@@ -303,7 +303,7 @@ class TrainerCMMRL(BaseTrainerCMMRL):
         with torch.no_grad():
             val_loss = 0
             val_gts, val_res = [], []
-            for batch_idx, (images_id, images, reports_ids, reports_masks) in enumerate(self.val_dataloader):
+            for batch_idx, (images_id, images, reports_ids, reports_masks, _,_,_,_,_,_) in enumerate(self.val_dataloader):
                 images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(
                     self.device), reports_masks.to(self.device)
 
@@ -335,7 +335,7 @@ class TrainerCMMRL(BaseTrainerCMMRL):
         self.model.eval()
         with torch.no_grad():
             test_gts, test_res = [], []
-            for batch_idx, (images_id, images, reports_ids, reports_masks) in enumerate(self.test_dataloader):
+            for batch_idx, (images_id, images, reports_ids, reports_masks, _,_,_,_,_,_) in enumerate(self.test_dataloader):
                 images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(
                     self.device), reports_masks.to(self.device)
                 output, _ = self.model(images, mode='sample')

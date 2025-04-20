@@ -150,7 +150,8 @@ def main():
     model = CMNModel(args, tokenizer)
 
     # get function handles of loss and metrics
-    criterion = RewardCriterion()
+    # criterion = RewardCriterion()
+    criterion = compute_loss
     metrics = compute_scores
 
 
