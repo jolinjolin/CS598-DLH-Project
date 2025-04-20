@@ -1,8 +1,9 @@
 import argparse
-
+import sys
+import os
 import numpy as np
 import torch
-
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from models.R2Gen_model import R2GenModel
 from dataloaders.dataloader2 import R2DataLoader
 from trainers.loss import compute_loss

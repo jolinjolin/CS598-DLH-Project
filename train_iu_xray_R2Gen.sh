@@ -3,7 +3,7 @@ python tasks/train_R2Gen.py\
     --max_seq_length 60 \
     --threshold 3 \
     --epochs 100 \
-    --batch_size 8 \
+    --batch_size 16 \
     --lr_ve 1e-4 \
     --lr_ed 5e-4 \
     --step_size 10 \

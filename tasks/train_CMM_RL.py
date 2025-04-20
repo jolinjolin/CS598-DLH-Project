@@ -1,13 +1,14 @@
 import argparse
-
+import os
+import sys
 import numpy as np
 import torch
-
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from models.CMN_model import CMNModel
 from dataloaders.dataloader2 import R2DataLoader
-from trainers.loss import compute_loss
+from trainers.loss import compute_loss, RewardCriterion
 from trainers.metrics import compute_scores
-from trainers.optimizers import build_optimizer, build_lr_scheduler
+from trainers.optimizers import build_optimizer, build_lr_scheduler, build_plateau_optimizer
 from trainers.trainer_cmm_rl import TrainerCMMRL
 from utils.tokenizers import Tokenizer
 
@@ -103,10 +104,20 @@ def parse_agrs():
     parser.add_argument('--noamopt_warmup', type=int, default=5000, help='.')
     parser.add_argument('--noamopt_factor', type=int, default=1, help='.')
 
+    parser.add_argument('--reduce_on_plateau_factor', type=float, default=0.5, help='')
+    parser.add_argument('--reduce_on_plateau_patience', type=int, default=3, help='')
+
     # Learning Rate Scheduler
     parser.add_argument('--lr_scheduler', type=str, default='StepLR', help='the type of the learning rate scheduler.')
     parser.add_argument('--step_size', type=int, default=50, help='the step size of the learning rate scheduler.')
     parser.add_argument('--gamma', type=float, default=0.1, help='the gamma of the learning rate scheduler.')
+
+    # Self-Critical Training
+    parser.add_argument('--train_sample_n', type=int, default=1, help='The reward weight from cider')
+    parser.add_argument('--train_sample_method', type=str, default='sample', help='')
+    parser.add_argument('--train_beam_size', type=int, default=1, help='')
+    parser.add_argument('--sc_sample_method', type=str, default='greedy', help='')
+    parser.add_argument('--sc_beam_size', type=int, default=1, help='')
 
     # Others
     parser.add_argument('--seed', type=int, default=9233, help='.')
@@ -139,16 +150,18 @@ def main():
     model = CMNModel(args, tokenizer)
 
     # get function handles of loss and metrics
+    # criterion = RewardCriterion()
     criterion = compute_loss
     metrics = compute_scores
 
 
     # build optimizer, learning rate scheduler
-    optimizer = build_optimizer(args, model)
-    lr_scheduler = build_lr_scheduler(args, optimizer)
+    # optimizer = build_optimizer(args, model)
+    # lr_scheduler = build_lr_scheduler(args, optimizer)
+    ve_optimizer, ed_optimizer = build_plateau_optimizer(args, model)
 
     # build trainer and start to train
-    trainer = TrainerCMMRL(model, criterion, metrics, optimizer, args, lr_scheduler, train_dataloader, val_dataloader, test_dataloader)
+    trainer = TrainerCMMRL(model, criterion, metrics, ve_optimizer, ed_optimizer, args, train_dataloader, val_dataloader, test_dataloader)
     trainer.train()
 
 

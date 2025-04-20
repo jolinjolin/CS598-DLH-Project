@@ -48,7 +48,7 @@ class TrainerNonRL(BaseTrainer):
             "[{}/{}] Start to train in the training set.".format(epoch, self.epochs)
         )
         self.model.train()
-        for batch_idx, (images_id, images, reports_ids, reports_masks) in enumerate(
+        for batch_idx, (images_id, images, reports_ids, reports_masks, _,_,_,_,_,_) in enumerate(
             self.train_dataloader
         ):
             images, reports_ids, reports_masks = (
@@ -82,7 +82,7 @@ class TrainerNonRL(BaseTrainer):
         self.model.eval()
         with torch.no_grad():
             val_gts, val_res = [], []
-            for batch_idx, (images_id, images, reports_ids, reports_masks) in enumerate(
+            for batch_idx, (images_id, images, reports_ids, reports_masks, _,_,_,_,_,_) in enumerate(
                 self.val_dataloader
             ):
                 images, reports_ids, reports_masks = (
@@ -112,7 +112,7 @@ class TrainerNonRL(BaseTrainer):
         self.model.eval()
         with torch.no_grad():
             test_gts, test_res = [], []
-            for batch_idx, (images_id, images, reports_ids, reports_masks) in enumerate(
+            for batch_idx, (images_id, images, reports_ids, reports_masks, _,_,_,_,_,_) in enumerate(
                 self.test_dataloader
             ):
                 images, reports_ids, reports_masks = (
@@ -129,7 +129,7 @@ class TrainerNonRL(BaseTrainer):
                 test_gts.extend(ground_truths)
 
             # test_gts, test_res = self.heihei()
-            self.imbalanced_eval(test_res, test_gts)
+            # self.imbalanced_eval(test_res, test_gts)
             test_met = self.metric_ftns(
                 {i: [gt] for i, gt in enumerate(test_gts)},
                 {i: [re] for i, re in enumerate(test_res)},
