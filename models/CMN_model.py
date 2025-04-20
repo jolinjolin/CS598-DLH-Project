@@ -54,7 +54,7 @@ class CMNModel(nn.Module):
             output, output_probs = self.encoder_decoder(
                 fc_feats, att_feats, mode="sample", update_opts=update_opts
             )
-            return output
+            return output, output_probs
         else:
             raise ValueError
 
@@ -67,6 +67,6 @@ class CMNModel(nn.Module):
             output, output_probs = self.encoder_decoder(
                 fc_feats, att_feats, mode="sample", update_opts=update_opts
             )
-            return output
+            return output, output_probs
         else:
             raise ValueError

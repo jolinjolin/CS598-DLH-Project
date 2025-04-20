@@ -49,18 +49,20 @@ class R2GenModel(nn.Module):
         att_feats = torch.cat((att_feats_0, att_feats_1), dim=1)
         if mode == 'train':
             output = self.encoder_decoder(fc_feats, att_feats, targets, mode='forward')
+            return output
         elif mode == 'sample':
-            output, _ = self.encoder_decoder(fc_feats, att_feats, mode='sample')
+            output, output_probs = self.encoder_decoder(fc_feats, att_feats, mode='sample')
+            return output, output_probs
         else:
             raise ValueError
-        return output
 
     def forward_mimic_cxr(self, images, targets=None, mode='train'):
         att_feats, fc_feats = self.visual_extractor(images)
         if mode == 'train':
             output = self.encoder_decoder(fc_feats, att_feats, targets, mode='forward')
+            return output
         elif mode == 'sample':
-            output, _ = self.encoder_decoder(fc_feats, att_feats, mode='sample')
+            output, output_probs = self.encoder_decoder(fc_feats, att_feats, mode='sample')
+            return output, output_probs
         else:
             raise ValueError
-        return output

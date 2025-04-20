@@ -118,7 +118,7 @@ class TrainerRL(BaseTrainer):
             # optimizing rl by calculating reward on test set
             with torch.no_grad():
                 self.model.load_state_dict(lm_param)
-                output = self.model(images2, mode="sample")
+                output, _ = self.model(images2, mode="sample")
                 reports = self.model.tokenizer.decode_batch(output.cpu().numpy())
                 ground_truths = self.model.tokenizer.decode_batch(
                     reports_ids2[:, 1:].cpu().numpy()
@@ -126,7 +126,7 @@ class TrainerRL(BaseTrainer):
                 lm_reward = self.reward(ground_truths, reports)
 
                 self.model.load_state_dict(rl_param)
-                output = self.model(images2, mode="sample")
+                output, _ = self.model(images2, mode="sample")
                 reports = self.model.tokenizer.decode_batch(output.cpu().numpy())
                 ground_truths = self.model.tokenizer.decode_batch(
                     reports_ids2[:, 1:].cpu().numpy()
@@ -192,7 +192,7 @@ class TrainerRL(BaseTrainer):
                     reports_ids.to(self.device),
                     reports_masks.to(self.device),
                 )
-                output = self.model(images, mode="sample")
+                output, _ = self.model(images, mode="sample")
                 reports = self.model.tokenizer.decode_batch(output.cpu().numpy())
                 ground_truths = self.model.tokenizer.decode_batch(
                     reports_ids[:, 1:].cpu().numpy()
@@ -225,7 +225,7 @@ class TrainerRL(BaseTrainer):
                     reports_ids.to(self.device),
                     reports_masks.to(self.device),
                 )
-                output = self.model(images, mode="sample")
+                output, _ = self.model(images, mode="sample")
                 reports = self.model.tokenizer.decode_batch(output.cpu().numpy())
                 ground_truths = self.model.tokenizer.decode_batch(
                     reports_ids[:, 1:].cpu().numpy()
