@@ -16,4 +16,5 @@ python tasks/test.py \
     --beam_size 3 \
     --save_dir results/iu_xray_TIMER/ \
     --log_period 50 \
-    --load results/iu_xray_TIMER/best-model.pth
+    --load results/iu_xray_TIMER/best-model.pth\
+    # --save_report 

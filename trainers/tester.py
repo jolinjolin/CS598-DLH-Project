@@ -94,6 +94,11 @@ class BaseTester(object):
         self.logger.info("Loading checkpoint: {} ...".format(load_path))
         checkpoint = torch.load(load_path)
         self.model.load_state_dict(checkpoint['state_dict'])
+    
+    def _save_reports(self, report, file_path):
+        with open(file_path, 'a') as f:
+            for i, r in enumerate(report):
+                f.write(f'{r}\n')
 
 
 class Tester(BaseTester):
@@ -115,6 +120,9 @@ class Tester(BaseTester):
                 ground_truths = self.model.tokenizer.decode_batch(reports_ids[:, 1:].cpu().numpy())
                 test_res.extend(reports)
                 test_gts.extend(ground_truths)
+                if self.args.save_report:
+                    self._save_reports(reports, os.path.join(self.save_dir, "preds.csv"))
+                    self._save_reports(ground_truths, os.path.join(self.save_dir, "ground_truths.csv"))
 
             test_met = self.metric_ftns({i: [gt] for i, gt in enumerate(test_gts)},
                                         {i: [re] for i, re in enumerate(test_res)})

@@ -8,9 +8,10 @@ from models.CMN_model import CMNModel
 from models.R2Gen_model import R2GenModel
 from dataloaders.dataloader2 import R2DataLoader
 from trainers.loss import compute_loss
-from trainers.metrics import compute_scores
+from trainers.metrics import compute_scores, compute_mlc
 from utils.tokenizers import Tokenizer
 from trainers.tester import Tester
+from tasks.imbalanced_eval import preprogress, imbalanced_eval
 
 
 def parse_agrs():
@@ -99,6 +100,7 @@ def parse_agrs():
     parser.add_argument('--seed', type=int, default=9233, help='.')
     parser.add_argument('--resume', type=str, help='whether to resume the training from existing checkpoints.')
     parser.add_argument('--load', type=str, help='whether to load the pre-trained model.')
+    parser.add_argument('--save_report', action='store_true', help='whether to save the reports.')
 
     args = parser.parse_args()
     return args
