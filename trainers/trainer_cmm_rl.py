@@ -333,7 +333,7 @@ class TrainerCMMRL(BaseTrainerCMMRL):
                 with torch.no_grad():
                     # val_loss = 0
                     val_gts, val_res = [], []
-                    for batch_idx, (images_id, images, reports_ids, reports_masks) in enumerate(self.val_dataloader):
+                    for batch_idx, (images_id, images, reports_ids, reports_masks, _,_,_,_,_,_) in enumerate(self.val_dataloader):
                         images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(
                             self.device), reports_masks.to(self.device)
 
@@ -424,7 +424,7 @@ class TrainerCMMRL(BaseTrainerCMMRL):
         self.model.eval()
         with torch.no_grad():
             test_gts, test_res = [], []
-            for batch_idx, (images_id, images, reports_ids, reports_masks) in enumerate(self.test_dataloader):
+            for batch_idx, (images_id, images, reports_ids, reports_masks, _,_,_,_,_,_) in enumerate(self.test_dataloader):
                 images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(
                     self.device), reports_masks.to(self.device)
                 output, _ = self.model(images, mode='sample')
