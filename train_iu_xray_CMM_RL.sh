@@ -3,7 +3,7 @@ python tasks/train_CMM_RL.py\
     --max_seq_length 60 \
     --threshold 3 \
     --epochs 100 \
-    --batch_size 8 \
+    --batch_size 4 \
     --lr_ve 1e-4 \
     --lr_ed 5e-4 \
     --step_size 10 \
@@ -12,7 +12,7 @@ python tasks/train_CMM_RL.py\
     --topk 32 \
     --cmm_size 2048 \
     --cmm_dim 512 \
-    --seed 7580 \
+    --seed 32103 \
     --beam_size 3 \
     --save_dir results/iu_xray_CMM_RL/ \
-    --log_period 50
+    --log_period 200
