@@ -49,12 +49,12 @@ class CMNModel(nn.Module):
         att_feats = torch.cat((att_feats_0, att_feats_1), dim=1)
         if mode == "train":
             output = self.encoder_decoder(fc_feats, att_feats, targets, mode="forward")
-            return output, None
+            return output
         elif mode == "sample":
             output, output_probs = self.encoder_decoder(
                 fc_feats, att_feats, mode="sample", update_opts=update_opts
             )
-            return output, output_probs
+            return output
         else:
             raise ValueError
 
@@ -62,11 +62,11 @@ class CMNModel(nn.Module):
         att_feats, fc_feats = self.visual_extractor(images)
         if mode == "train":
             output = self.encoder_decoder(fc_feats, att_feats, targets, mode="forward")
-            return output, None
+            return output
         elif mode == "sample":
             output, output_probs = self.encoder_decoder(
                 fc_feats, att_feats, mode="sample", update_opts=update_opts
             )
-            return output, output_probs
+            return output
         else:
             raise ValueError
