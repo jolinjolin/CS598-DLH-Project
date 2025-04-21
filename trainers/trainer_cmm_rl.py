@@ -9,60 +9,37 @@ import torch
 from numpy import inf
 
 from .optimizers import set_lr, get_lr
+from .rewards import get_self_critical_reward, init_scorer
+from .loss import compute_loss
 
 np.seterr(divide="ignore", invalid="ignore")
-
 """
-BaseTrainerCMMRL:
-    A base class for training models with a focus on reinforcement learning for CMM tasks. 
-    Handles training, validation, checkpointing, and logging.
+This module defines the `BaseTrainerCMMRL` and `TrainerCMMRL` classes for training models with reinforcement learning
+and self-critical sequence training. The `BaseTrainerCMMRL` class provides a base implementation for training, 
+checkpointing, and evaluation, while the `TrainerCMMRL` class extends it with specific training logic.
 
-    Methods:
-        __init__(model, criterion, metric_ftns, ve_optimizer, ed_optimizer, args):
-            Initializes the trainer with the model, loss function, metrics, optimizers, and arguments.
-        
-        _train_epoch(epoch):
-            Abstract method to train the model for one epoch. Must be implemented in subclasses.
-        
-        train():
-            Executes the training loop, including validation and checkpointing.
-        
-        _record_best(log):
-            Records the best validation and test metrics during training.
-        
-        _print_to_file(log):
-            Logs training and evaluation results to a CSV file.
-        
-        _print_best():
-            Logs the best validation and test results.
-        
-        _get_learning_rate():
-            Retrieves the current learning rates for the visual extractor and encoder-decoder optimizers.
-        
-        _prepare_device(n_gpu_use):
-            Prepares the device (CPU/GPU) for training and handles multi-GPU setups.
-        
-        _save_checkpoint(epoch, save_best=False):
-            Saves the current model checkpoint and optionally the best model checkpoint.
-        
-        _resume_checkpoint(resume_path):
-            Resumes training from a saved checkpoint.
+Classes:
+    - BaseTrainerCMMRL: A base class for reinforcement learning trainers.
+        Methods:
+            - __init__: Initializes the trainer with model, criterion, optimizers, and other configurations.
+            - _train_epoch: Abstract method to define the training logic for one epoch.
+            - train: Executes the training loop across epochs.
+            - _save_best: Saves the best model checkpoint based on validation performance.
+            - _record_best: Records the best validation and test metrics.
+            - _print_best: Logs the best validation and test results.
+            - _get_learning_rate: Retrieves the current learning rates for visual extractor and encoder-decoder.
+            - _prepare_device: Prepares the device (CPU/GPU) for training.
+            - _save_checkpoint: Saves the current model checkpoint.
+            - _resume_checkpoint: Resumes training from a saved checkpoint.
+            - _write_to_file: Writes ground truth and generated results to files.
 
-TrainerCMMRL:
-    A subclass of BaseTrainerCMMRL that implements the training logic for a specific model.
-
-    Methods:
-        __init__(model, criterion, metric_ftns, ve_optimizer, ed_optimizer, args, train_dataloader, val_dataloader, test_dataloader):
-            Initializes the trainer with the model, loss function, metrics, optimizers, arguments, and data loaders.
-        
-        _set_lr_ve(iteration):
-            Adjusts the learning rate for the visual extractor optimizer based on the current iteration.
-        
-        _set_lr_ed(iteration):
-            Adjusts the learning rate for the encoder-decoder optimizer based on the current iteration.
-        
-        _train_epoch(epoch):
-            Implements the training logic for one epoch, including loss computation, backpropagation, and logging.
+    - TrainerCMMRL: A specific implementation of `BaseTrainerCMMRL` for training with self-critical reinforcement learning.
+        Methods:
+            - __init__: Initializes the trainer with dataloaders and additional configurations.
+            - _set_lr_ve: Adjusts the learning rate for the visual extractor during warmup.
+            - _set_lr_ed: Adjusts the learning rate for the encoder-decoder during warmup.
+            - _train_epoch: Defines the training logic for one epoch, including self-critical reinforcement learning,
+                            validation, and test evaluation.
 """
 class BaseTrainerCMMRL(object):
     def __init__(self, model, criterion, metric_ftns, ve_optimizer, ed_optimizer, args):
@@ -95,7 +72,7 @@ class BaseTrainerCMMRL(object):
         self.early_stop = getattr(self.args, 'early_stop', inf)
 
         self.start_epoch = 1
-        self.checkpoint_dir = args.save_dir + '_seed_' + str(args.seed)
+        self.checkpoint_dir = args.save_dir
 
         self.best_recorder = {'val': {self.mnt_metric: self.mnt_best},
                               'test': {self.mnt_metric_test: self.mnt_best}}
@@ -154,6 +131,27 @@ class BaseTrainerCMMRL(object):
             if epoch % self.save_period == 0:
                 self._save_checkpoint(epoch, save_best=best)
 
+    def _save_best(self, epoch, log):
+        # evaluate model performance according to configured metric, save best checkpoint as model_best
+        best = False
+        if self.mnt_mode != 'off':
+            try:
+                # check whether model performance improved or not, according to specified metric(mnt_metric)
+                improved = (self.mnt_mode == 'min' and log[self.mnt_metric] <= self.mnt_best) or \
+                           (self.mnt_mode == 'max' and log[self.mnt_metric] >= self.mnt_best)
+            except KeyError:
+                self.logger.warning(
+                    "Warning: Metric '{}' is not found. " "Model performance monitoring is disabled.".format(
+                        self.mnt_metric))
+                self.mnt_mode = 'off'
+                improved = False
+
+            if improved:
+                self.mnt_best = log[self.mnt_metric]
+                best = True
+
+            self._save_checkpoint(epoch, save_best=best)
+
     def _record_best(self, log):
         improved_val = (self.mnt_mode == 'min' and log[self.mnt_metric] <= self.best_recorder['val'][
             self.mnt_metric]) or \
@@ -176,7 +174,8 @@ class BaseTrainerCMMRL(object):
 
     #     if not os.path.exists(self.args.record_dir):
     #         os.makedirs(self.args.record_dir)
-    #     record_path = os.path.join(self.args.record_dir, self.args.dataset_name + '_seed_' + str(self.args.seed) + '.csv')
+    #     record_path = os.path.join(self.args.record_dir,
+    #                                self.args.dataset_name + '_rl' + '.csv')
     #     if not os.path.exists(record_path):
     #         record_table = pd.DataFrame()
     #     else:
@@ -197,8 +196,8 @@ class BaseTrainerCMMRL(object):
 
     def _get_learning_rate(self):
         lrs = list()
-        lrs.append(self.ve_optimizer.state_dict()['param_groups'][0]['lr'])
-        lrs.append(self.ed_optimizer.state_dict()['param_groups'][0]['lr'])
+        lrs.append(self.ve_optimizer.current_lr)
+        lrs.append(self.ed_optimizer.current_lr)
 
         return {'lr_visual_extractor': lrs[0], 'lr_encoder_decoder': lrs[1]}
 
@@ -240,10 +239,20 @@ class BaseTrainerCMMRL(object):
         self.start_epoch = checkpoint['epoch'] + 1
         self.mnt_best = checkpoint['monitor_best']
         self.model.load_state_dict(checkpoint['state_dict'])
-        self.ve_optimizer.load_state_dict(checkpoint['ve_optimizer'])
-        self.ed_optimizer.load_state_dict(checkpoint['ed_optimizer'])
+        # self.ve_optimizer.load_state_dict(checkpoint['ve_optimizer'])
+        # self.ed_optimizer.load_state_dict(checkpoint['ed_optimizer'])
 
         self.logger.info("Checkpoint loaded. Resume training from epoch {}".format(self.start_epoch))
+
+    def _write_to_file(self, gts, res, epoch, iter):
+        if not os.path.exists(self.args.record_dir):
+            os.makedirs(self.args.record_dir)
+        fgt = open(os.path.join(self.args.record_dir, 'gts-{}-{}.txt'.format(epoch, iter)), 'w')
+        for gt in gts:
+            fgt.write(gt + '\n')
+        fre = open(os.path.join(self.args.record_dir, 'res-{}-{}.txt'.format(epoch, iter)), 'w')
+        for re in res:
+            fre.write(re + '\n')
 
 
 class TrainerCMMRL(BaseTrainerCMMRL):
@@ -256,12 +265,9 @@ class TrainerCMMRL(BaseTrainerCMMRL):
         self.test_dataloader = test_dataloader
 
     def _set_lr_ve(self, iteration):
-        # if iteration < self.args.noamopt_warmup:
-        #     current_lr = self.args.lr_ve * (iteration + 1) / self.args.noamopt_warmup
-        #     set_lr(self.ve_optimizer, current_lr)
-        current_lr_ed = get_lr(self.ed_optimizer)
-        current_lr_ve = current_lr_ed * 0.1
-        set_lr(self.ve_optimizer, current_lr_ve)
+        if iteration < self.args.noamopt_warmup:
+            current_lr = self.args.lr_ve * (iteration + 1) / self.args.noamopt_warmup
+            set_lr(self.ve_optimizer, current_lr)
 
     def _set_lr_ed(self, iteration):
         if iteration < self.args.noamopt_warmup:
@@ -275,14 +281,37 @@ class TrainerCMMRL(BaseTrainerCMMRL):
         self.model.train()
         for batch_idx, (images_id, images, reports_ids, reports_masks, _,_,_,_,_,_) in enumerate(self.train_dataloader):
 
-            iteration = batch_idx + (epoch - 1) * len(self.train_dataloader)
-            # self._set_lr_ed(iteration)
-            self._set_lr_ve(iteration)
+            images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(self.device), \
+                                                 reports_masks.to(self.device)
+
+            # ********* Self-Critical *********
+            init_scorer()
+            self.model.eval()
+            with torch.no_grad():
+                greedy_res, _ = self.model(images, mode='sample',
+                                           update_opts={'sample_method': self.args.sc_sample_method,
+                                                        'beam_size': self.args.sc_beam_size})
+
+            self.model.train()
+            gen_result, sample_logprobs = self.model(images, mode='sample',
+                                                     update_opts={'sample_method': self.args.train_sample_method,
+                                                                  'beam_size': self.args.train_beam_size,
+                                                                  'sample_n': self.args.train_sample_n})
+
+            gts = reports_ids[:, 1:]
+            reward = get_self_critical_reward(greedy_res, gts, gen_result)
+            reward = torch.from_numpy(reward).to(sample_logprobs)
+            loss_rl = self.criterion(sample_logprobs, gen_result.data, reward)
 
             images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(self.device), \
                                                  reports_masks.to(self.device)
             output = self.model(images, reports_ids, mode='train')
-            loss = self.criterion(output, reports_ids, reports_masks)
+            loss_nll = compute_loss(output, reports_ids, reports_masks)
+
+            loss = 0.01 * loss_nll + 0.99 * loss_rl
+
+            # ********* Self-Critical *********
+
             train_loss += loss.item()
             self.ve_optimizer.zero_grad()
             self.ed_optimizer.zero_grad()
@@ -291,29 +320,89 @@ class TrainerCMMRL(BaseTrainerCMMRL):
             self.ed_optimizer.step()
             if batch_idx % self.args.log_period == 0:
                 lrs = self._get_learning_rate()
-                self.logger.info('[{}/{}] Step: {}/{}, Training Loss: {:.5f}, LR (ve): {:.5f}, LR (ed): {:5f}.'
+                self.logger.info('[{}/{}] Step: {}/{}, Training Loss: {:.6f}, LR (ve): {:.6f}, LR (ed): {:6f}.'
                                  .format(epoch, self.epochs, batch_idx, len(self.train_dataloader),
                                          train_loss / (batch_idx + 1), lrs['lr_visual_extractor'],
                                          lrs['lr_encoder_decoder']))
+
+            if (batch_idx+1) % self.args.sc_eval_period == 0:
+                log = {'train_loss': train_loss / (batch_idx + 1)}
+
+                self.logger.info('[{}/{}] Start to evaluate in the validation set.'.format(epoch, self.epochs))
+                self.model.eval()
+                with torch.no_grad():
+                    # val_loss = 0
+                    val_gts, val_res = [], []
+                    for batch_idx, (images_id, images, reports_ids, reports_masks, _,_,_,_,_,_) in enumerate(self.val_dataloader):
+                        images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(
+                            self.device), reports_masks.to(self.device)
+
+                        # # ****** Compute Loss ******
+                        # images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(self.device), \
+                        #                                      reports_masks.to(self.device)
+                        # output = self.model(images, reports_ids, mode='train')
+                        # loss = self.criterion(output, reports_ids, reports_masks)
+                        # val_loss += loss.item()
+                        # # ****** Compute Loss ******
+
+                        output, _ = self.model(images, mode='sample')
+                        reports = self.model.tokenizer.decode_batch(output.cpu().numpy())
+                        ground_truths = self.model.tokenizer.decode_batch(reports_ids[:, 1:].cpu().numpy())
+                        val_res.extend(reports)
+                        val_gts.extend(ground_truths)
+
+                        # for id, re, gt in zip(images_id, reports, ground_truths):
+                        #     print(id)
+                        #     print('[Generated]: {}'.format(re))
+                        #     print('[Ground Truth]: {}'.format(gt))
+
+                    val_met = self.metric_ftns({i: [gt] for i, gt in enumerate(val_gts)},
+                                               {i: [re] for i, re in enumerate(val_res)})
+                    log.update(**{'val_' + k: v for k, v in val_met.items()})
+
+                self.logger.info('[{}/{}] Start to evaluate in the test set.'.format(epoch, self.epochs))
+                self.model.eval()
+                with torch.no_grad():
+                    test_gts, test_res = [], []
+                    for batch_idx, (images_id, images, reports_ids, reports_masks, _,_,_,_,_,_) in enumerate(self.test_dataloader):
+                        images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(
+                            self.device), reports_masks.to(self.device)
+                        output, _ = self.model(images, mode='sample')
+                        reports = self.model.tokenizer.decode_batch(output.cpu().numpy())
+                        ground_truths = self.model.tokenizer.decode_batch(reports_ids[:, 1:].cpu().numpy())
+                        test_res.extend(reports)
+                        test_gts.extend(ground_truths)
+
+                        # for id, re, gt in zip(images_id, reports, ground_truths):
+                        #     print(id)
+                        #     print('[Generated]: {}'.format(re))
+                        #     print('[Ground Truth]: {}'.format(gt))
+
+                    test_met = self.metric_ftns({i: [gt] for i, gt in enumerate(test_gts)},
+                                                {i: [re] for i, re in enumerate(test_res)})
+                    log.update(**{'test_' + k: v for k, v in test_met.items()})
+                self._save_best(epoch, log)
+                # self._print_to_file(log)
+                # self._write_to_file(test_gts, test_res, epoch, batch_idx)
 
         log = {'train_loss': train_loss / len(self.train_dataloader)}
 
         self.logger.info('[{}/{}] Start to evaluate in the validation set.'.format(epoch, self.epochs))
         self.model.eval()
         with torch.no_grad():
-            val_loss = 0
+            # val_loss = 0
             val_gts, val_res = [], []
             for batch_idx, (images_id, images, reports_ids, reports_masks, _,_,_,_,_,_) in enumerate(self.val_dataloader):
                 images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(
                     self.device), reports_masks.to(self.device)
 
-                # ****** Compute Loss ******
-                images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(self.device), \
-                                                     reports_masks.to(self.device)
-                output = self.model(images, reports_ids, mode='train')
-                loss = self.criterion(output, reports_ids, reports_masks)
-                val_loss += loss.item()
-                # ****** Compute Loss ******
+                # # ****** Compute Loss ******
+                # images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(self.device), \
+                #                                      reports_masks.to(self.device)
+                # output = self.model(images, reports_ids, mode='train')
+                # loss = self.criterion(output, reports_ids, reports_masks)
+                # val_loss += loss.item()
+                # # ****** Compute Loss ******
 
                 output, _ = self.model(images, mode='sample')
                 reports = self.model.tokenizer.decode_batch(output.cpu().numpy())
@@ -321,15 +410,15 @@ class TrainerCMMRL(BaseTrainerCMMRL):
                 val_res.extend(reports)
                 val_gts.extend(ground_truths)
 
-                for id, re, gt in zip(images_id, reports, ground_truths):
-                    print(id)
-                    print('[Generated]: {}'.format(re))
-                    print('[Ground Truth]: {}'.format(gt))
+                # for id, re, gt in zip(images_id, reports, ground_truths):
+                #     print(id)
+                #     print('[Generated]: {}'.format(re))
+                #     print('[Ground Truth]: {}'.format(gt))
 
             val_met = self.metric_ftns({i: [gt] for i, gt in enumerate(val_gts)},
                                        {i: [re] for i, re in enumerate(val_res)})
             log.update(**{'val_' + k: v for k, v in val_met.items()})
-            log.update(**{'val_loss': val_loss / len(self.val_dataloader)})
+            # log.update(**{'val_loss': val_loss / len(self.val_dataloader)})
 
         self.logger.info('[{}/{}] Start to evaluate in the test set.'.format(epoch, self.epochs))
         self.model.eval()
@@ -344,16 +433,17 @@ class TrainerCMMRL(BaseTrainerCMMRL):
                 test_res.extend(reports)
                 test_gts.extend(ground_truths)
 
-                for id, re, gt in zip(images_id, reports, ground_truths):
-                    print(id)
-                    print('[Generated]: {}'.format(re))
-                    print('[Ground Truth]: {}'.format(gt))
+                # for id, re, gt in zip(images_id, reports, ground_truths):
+                #     print(id)
+                #     print('[Generated]: {}'.format(re))
+                #     print('[Ground Truth]: {}'.format(gt))
 
             test_met = self.metric_ftns({i: [gt] for i, gt in enumerate(test_gts)},
                                         {i: [re] for i, re in enumerate(test_res)})
             log.update(**{'test_' + k: v for k, v in test_met.items()})
 
         log.update(**self._get_learning_rate())
+        # self._write_to_file(test_gts, test_res, epoch, 0)
         # self.lr_scheduler.step()
 
         return log

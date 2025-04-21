@@ -91,7 +91,7 @@ class TrainerNonRL(BaseTrainer):
                     reports_masks.to(self.device),
                 )
 
-                output = self.model(images, mode="sample")
+                output, _ = self.model(images, mode="sample")
                 reports = self.model.tokenizer.decode_batch(output.cpu().numpy())
                 ground_truths = self.model.tokenizer.decode_batch(
                     reports_ids[:, 1:].cpu().numpy()
@@ -120,7 +120,7 @@ class TrainerNonRL(BaseTrainer):
                     reports_ids.to(self.device),
                     reports_masks.to(self.device),
                 )
-                output = self.model(images, mode="sample")
+                output, _ = self.model(images, mode="sample")
                 reports = self.model.tokenizer.decode_batch(output.cpu().numpy())
                 ground_truths = self.model.tokenizer.decode_batch(
                     reports_ids[:, 1:].cpu().numpy()

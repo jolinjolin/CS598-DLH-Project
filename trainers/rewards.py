@@ -15,7 +15,39 @@ logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message
 logger = logging.getLogger(__name__)
 
 Bleu_scorer = None
+"""
+This module provides functions for calculating self-critical rewards using BLEU scores
+for reinforcement learning in sequence generation tasks.
 
+Functions:
+----------
+- init_scorer():
+    Initializes the global BLEU scorer instance using the `Bleu` class from `pycocoevalcap`.
+
+- array_to_str(arr):
+    Converts a sequence of integers (array) into a space-separated string representation.
+    Stops conversion when a zero is encountered.
+
+    Parameters:
+    - arr (list or numpy array): The input sequence of integers.
+
+    Returns:
+    - str: The space-separated string representation of the input sequence.
+
+- get_self_critical_reward(greedy_res, data_gts, gen_result):
+    Computes self-critical rewards for a batch of generated sequences using BLEU scores.
+    The reward is calculated as the difference between the BLEU score of the generated
+    sequence and the BLEU score of the greedy sequence.
+
+    Parameters:
+    - greedy_res (torch.Tensor): The greedy-decoded sequences (batch_size x seq_length).
+    - data_gts (torch.Tensor): The ground truth sequences (batch_size x seq_length).
+    - gen_result (torch.Tensor): The generated sequences (batch_size * seq_per_img x seq_length).
+
+    Returns:
+    - numpy.ndarray: A rewards matrix of shape (batch_size * seq_per_img x seq_length),
+      where each element corresponds to the reward for a token in the generated sequence.
+"""
 
 def init_scorer():
     global Bleu_scorer
