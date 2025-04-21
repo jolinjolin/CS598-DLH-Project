@@ -115,7 +115,7 @@ class Tester(BaseTester):
             for bbatch_idx, (images_id, images, reports_ids, reports_masks, _,_,_,_,_,_) in enumerate(self.test_dataloader):
                 images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(
                     self.device), reports_masks.to(self.device)
-                output = self.model(images, mode='sample')
+                output, _ = self.model(images, mode='sample')
                 reports = self.model.tokenizer.decode_batch(output.cpu().numpy())
                 ground_truths = self.model.tokenizer.decode_batch(reports_ids[:, 1:].cpu().numpy())
                 test_res.extend(reports)
@@ -146,7 +146,7 @@ class Tester(BaseTester):
             for batch_idx, (images_id, images, reports_ids, reports_masks, _,_,_,_,_,_) in enumerate(self.test_dataloader):
                 images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(
                     self.device), reports_masks.to(self.device)
-                output = self.model(images, mode='sample')
+                output, _ = self.model(images, mode='sample')
                 image = torch.clamp((images[0].cpu() * std + mean) * 255, 0, 255).int().cpu().numpy()
                 report = self.model.tokenizer.decode_batch(output.cpu().numpy())[0].split()
 
