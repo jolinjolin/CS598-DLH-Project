@@ -29,7 +29,7 @@ TIMER's architecture and implementation build upon the following baseline models
 ## Denpendencies
 ### Install using conda
 ```
-conda create --name TIMER --file env.yaml
+conda env create --file env.yaml
 ```
 ### Install using pip
 ```
