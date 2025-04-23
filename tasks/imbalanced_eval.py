@@ -62,7 +62,7 @@ def imbalanced_eval(pre,tgt,words, num_splits=8):
     recall_ = []
     precision_ = []
     right_ = []
-    gap = len(words)//(num_splits-1)
+    gap = len(words)//num_splits
 
     mm = 0
     for index in range(0,len(words),gap):
@@ -87,13 +87,8 @@ def imbalanced_eval(pre,tgt,words, num_splits=8):
     print(recall_)
     if recall_arr[0]is not None and precision_arr[0] is not None and recall_arr[0] != 0 and precision_arr[0] != 0:
         print(f'F1 score (high freq token set): {2*recall_arr[0]*precision_arr[0]/(recall_arr[0]+precision_arr[0])}')
-    recall_low, precision_low = 0, 0
-    for i in range(1,len(recall_arr)-1):
-        if recall_arr[i]is not None and precision_arr[i] is not None and recall_arr[i] != 0 and precision_arr[i] != 0:
-            recall_low += recall_arr[i]
-            precision_low += precision_arr[i]
-    if recall_low + precision_low != 0:
-        print(f'F1 score (low freq token set): {2*recall_low*precision_low/(recall_low+precision_low)}')
+    score = 2 * precision_arr[1:] * recall_arr[1:] / (precision_arr[1:] + recall_arr[1:])
+    print(f'F1 score (low freq token set): {np.sum(np.nan_to_num(score))}')
     
 
 def parse_agrs():
