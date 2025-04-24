@@ -117,7 +117,8 @@ class Trainer(BaseTrainer):
     def imbalanced_eval(self, pre, tgt, n=8):
         # Directly get the n least frequent tokens (excluding the last two special tokens)
         words = [w for w in self.model.tokenizer.token2idx][-n:-2]
-
+        if len(words) < n:
+            print(f"Warning: Token count ({len(words)}) is less than groups ({n}). Using gap=1.")
         recall_ = []
         precision_ = []
         right_ = []

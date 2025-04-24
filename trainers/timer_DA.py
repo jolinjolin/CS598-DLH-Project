@@ -106,6 +106,8 @@ class Trainer(BaseTrainer):
 
         # words = dict(sorted(dict(self.model.tokenizer.counter).items(), key=lambda x: x[1]))
         words = [w for w in self.model.tokenizer.token2idx][:-2]
+        if len(words) < n:
+            print(f"Warning: Token count ({len(words)}) is less than groups ({n}). Using gap=1.")
         recall_ = []
         precision_ = []
         right_ = []
