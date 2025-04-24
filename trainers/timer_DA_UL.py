@@ -24,7 +24,7 @@ class Trainer(BaseTrainer):
 
         # Define static frequent token set (Uh)
         # Example: top 100 most frequent tokens (excluding PAD, BOS, EOS)
-        freq_tokens = [w for w in self.model.tokenizer.token2idx][:100]
+        freq_tokens = list(self.model.tokenizer.token2idx.values())[:100]
 
         for batch_idx, (images_id, images, reports_ids, reports_masks, _,
                         images_id2, images2, reports_ids2, reports_masks2, _) in enumerate(self.train_dataloader):
