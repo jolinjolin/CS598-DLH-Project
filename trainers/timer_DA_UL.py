@@ -86,7 +86,7 @@ class Trainer(BaseTrainer):
             test_met = self.metric_ftns({i: [gt] for i, gt in enumerate(test_gts)},
                                         {i: [re] for i, re in enumerate(test_res)})
             log.update(**{'test_' + k: v for k, v in test_met.items()})
-
+        self.imbalanced_eval(test_res, test_gts, n=8)
         self.lr_scheduler.step()
         return log
 
