@@ -171,3 +171,16 @@ class Trainer(BaseTrainer):
         sorted_tokens = sorted(token_freqs.items(), key=lambda x: x[1], reverse=True)
         freq_tokens = [idx for idx, _ in sorted_tokens[:top_k]]
         return freq_tokens
+
+    def build_negative_word_tensor(self, output, freq_tokens):
+        # output shape: [batch_size, seq_len, vocab_size]
+        vocab_size = output.size(-1)
+
+        # Create a binary mask: [vocab_size]
+        negative_word = output.new_zeros(vocab_size)  # [vocab_size]
+        negative_word[freq_tokens] = 1  # Set frequent tokens to 1
+
+        # Expand dimensions: [1, 1, vocab_size] for broadcasting
+        negative_word = negative_word.unsqueeze(0).unsqueeze(0)
+
+        return negative_word  # Will broadcast across batch and sequence length
