@@ -7,6 +7,8 @@ from numpy import inf
 import torch.nn.functional as F
 from .trainer_base import BaseTrainer
 from tqdm import tqdm
+from collections import Counter
+
 
 class Trainer(BaseTrainer):
     def __init__(self, model, criterion, metric_ftns, optimizer, args, lr_scheduler, train_dataloader,
@@ -144,12 +146,28 @@ class Trainer(BaseTrainer):
         loss = -torch.log(torch.clamp(1.0 - (output * negative_word).exp(), min=1e-20))
         return torch.mean(torch.mean(loss, dim=-1), dim=-1)
 
-    def get_static_frequent_tokens(self, top_k=100):
-        # Assuming self.model.tokenizer.counter holds token frequencies
-        token_freq = self.model.tokenizer.counter  # This should be a dict {token: freq}
-        sorted_tokens = sorted(token_freq.items(), key=lambda x: x[1], reverse=True)
-        # Exclude special tokens (PAD, BOS, EOS)
+    def get_token_frequencies(self):
+        total_tokens = []
+        for example in self.model.tokenizer.ann['train']:  # Use annotation from tokenizer
+            tokens = self.model.tokenizer.clean_report(example['report']).split()
+            total_tokens.extend(tokens)
+        counter = Counter(total_tokens)
+
+        # Remove special tokens
         special_tokens = ['<pad>', '<bos>', '<eos>']
-        frequent_tokens = [self.model.tokenizer.token2idx[token] for token, _ in sorted_tokens if
-                           token not in special_tokens][:top_k]
-        return frequent_tokens
+        special_indices = [self.model.tokenizer.token2idx[st] for st in special_tokens if
+                           st in self.model.tokenizer.token2idx]
+
+        # Convert tokens to indices and exclude special tokens
+        token_freqs = {self.model.tokenizer.token2idx[tok]: freq
+                       for tok, freq in counter.items()
+                       if tok in self.model.tokenizer.token2idx and self.model.tokenizer.token2idx[
+                           tok] not in special_indices}
+
+        return token_freqs
+
+    def get_static_frequent_tokens(self, top_k=100):
+        token_freqs = self.get_token_frequencies()
+        sorted_tokens = sorted(token_freqs.items(), key=lambda x: x[1], reverse=True)
+        freq_tokens = [idx for idx, _ in sorted_tokens[:top_k]]
+        return freq_tokens
