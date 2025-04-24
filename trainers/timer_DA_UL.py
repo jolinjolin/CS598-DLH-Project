@@ -24,7 +24,7 @@ class Trainer(BaseTrainer):
 
         # Define static frequent token set (Uh)
         # Example: top 100 most frequent tokens (excluding PAD, BOS, EOS)
-        freq_tokens = self.get_static_frequent_tokens(top_k=100)
+        freq_tokens = [w for w in self.model.tokenizer.token2idx][:100]
 
         for batch_idx, (images_id, images, reports_ids, reports_masks, _,
                         images_id2, images2, reports_ids2, reports_masks2, _) in enumerate(self.train_dataloader):
@@ -114,15 +114,16 @@ class Trainer(BaseTrainer):
         score = 2 * precision * recall / (precision + recall)
         return np.sum(np.nan_to_num(score))
 
-    def imbalanced_eval(self, pre, tgt, n):
+    def imbalanced_eval(self, pre, tgt, n=8):
+        # Directly get the n least frequent tokens (excluding the last two special tokens)
+        words = [w for w in self.model.tokenizer.token2idx][-n:-2]
 
-        # words = dict(sorted(dict(self.model.tokenizer.counter).items(), key=lambda x: x[1]))
-        words = [w for w in self.model.tokenizer.token2idx][:-2]
         recall_ = []
         precision_ = []
         right_ = []
-        gap = len(words) // n
-        for index in range(0, len(words) - gap, gap):
+        gap = len(words) // n  # This will typically be 1 if you're just using the last n tokens
+
+        for index in range(0, len(words) - gap + 1, gap):  # Adjust to ensure last token group is covered
             right = 0
             recall = 0
             precision = 0
@@ -135,42 +136,20 @@ class Trainer(BaseTrainer):
             recall_.append(recall)
             precision_.append(precision)
             right_.append(right)
-        print(f'recall:{np.array(right_) / np.array(recall_)}')
-        print(f'precision:{np.array(right_) / np.array(precision_)}')
-        print(precision_)
-        print(recall_)
+
+        recall_arr = np.array(right_) / np.array(recall_)
+        precision_arr = np.array(right_) / np.array(precision_)
+
+        print(f"recall: {recall_arr}")
+        print(f"precision: {precision_arr}")
+        print(f"precision counts: {precision_}")
+        print(f"recall counts: {recall_}")
 
     def unlikelihood_loss(self, output, negative_word, mask):
 
         output = torch.sum(mask[:, 1:].unsqueeze(-1) * output, dim=1) / torch.sum(mask)
         loss = -torch.log(torch.clamp(1.0 - (output * negative_word).exp(), min=1e-20))
         return torch.mean(torch.mean(loss, dim=-1), dim=-1)
-
-    def get_token_frequencies(self):
-        total_tokens = []
-        for example in self.model.tokenizer.ann['train']:  # Use annotation from tokenizer
-            tokens = self.model.tokenizer.clean_report(example['report']).split()
-            total_tokens.extend(tokens)
-        counter = Counter(total_tokens)
-
-        # Remove special tokens
-        special_tokens = ['<pad>', '<bos>', '<eos>']
-        special_indices = [self.model.tokenizer.token2idx[st] for st in special_tokens if
-                           st in self.model.tokenizer.token2idx]
-
-        # Convert tokens to indices and exclude special tokens
-        token_freqs = {self.model.tokenizer.token2idx[tok]: freq
-                       for tok, freq in counter.items()
-                       if tok in self.model.tokenizer.token2idx and self.model.tokenizer.token2idx[
-                           tok] not in special_indices}
-
-        return token_freqs
-
-    def get_static_frequent_tokens(self, top_k=100):
-        token_freqs = self.get_token_frequencies()
-        sorted_tokens = sorted(token_freqs.items(), key=lambda x: x[1], reverse=True)
-        freq_tokens = [idx for idx, _ in sorted_tokens[:top_k]]
-        return freq_tokens
 
     def build_negative_word_tensor(self, output, freq_tokens):
         # output shape: [batch_size, seq_len, vocab_size]
