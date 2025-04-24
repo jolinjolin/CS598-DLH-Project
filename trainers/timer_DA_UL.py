@@ -122,7 +122,7 @@ class Trainer(BaseTrainer):
         recall_ = []
         precision_ = []
         right_ = []
-        gap = len(words) // n  # This will typically be 1 if you're just using the last n tokens
+        gap = max(len(words) // n, 1) # This will typically be 1 if you're just using the last n tokens
 
         for index in range(0, len(words) - gap + 1, gap):  # Adjust to ensure last token group is covered
             right = 0

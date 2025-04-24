@@ -111,7 +111,7 @@ class Trainer(BaseTrainer):
         recall_ = []
         precision_ = []
         right_ = []
-        gap = len(words) // n
+        gap = max(len(words) // n, 1)
         for index in range(0, len(words) - gap, gap):
             right = 0
             recall = 0
