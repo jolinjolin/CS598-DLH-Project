@@ -10,9 +10,8 @@ from dataloaders.dataloader2 import R2DataLoader
 from trainers.loss import compute_loss
 from trainers.metrics import compute_scores
 from trainers.optimizers import build_optimizer, build_lr_scheduler
-from trainers.timer_DA import Trainer
+from trainers.timer_DA_UL import Trainer
 from utils.tokenizers import Tokenizer
-
 
 def preprogress(f):
     f = open(f)
