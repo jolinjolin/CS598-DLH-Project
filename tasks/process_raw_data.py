@@ -6,8 +6,6 @@ import xml.etree.ElementTree as ET
 import argparse
 import random
 
-max_findings_length = 0
-max_impression_length = 0
 
 def parse_agrs():
     parser = argparse.ArgumentParser()
@@ -43,17 +41,6 @@ def extract_report_from_xml(xml_file, split="train"):
         elif elem.tag == "parentImage" and "id" in elem.attrib:
             image_id = elem.attrib["id"]
             image_ids.append(image_id)
-
-    # if len(image_ids) < 2:
-    #     # print(xml_file, image_ids)
-    #     return None
-    # if len(impression) > 60:
-    # if len(findings) > 60:
-    #     # print(xml_file)
-    #     return None
-    
-    max_findings_length = max(max_findings_length, len(findings))
-    max_impression_length = max(max_impression_length, len(impression)) 
 
 
     # report_text = findings if findings else impression
@@ -94,8 +81,6 @@ def process_all_xml(xml_folder):
             if result:
                 dataset[split].append(result)
 
-    print(f"Max findings length: {max_findings_length}") 
-    print(f"Max impression length: {max_impression_length}")
     tot_report = len(dataset['train']) + len(dataset['val']) + len(dataset['test'])
 
     return dataset, tot_report

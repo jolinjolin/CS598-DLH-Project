@@ -28,37 +28,6 @@ def parse_agrs():
                 
 
 def get_sorted_tokens(tokenizer):
-    # total_tokens = []
-    # report_length, tot_report = 0, 0
-    # for example in tokenizer.ann['train']:
-    #     tokens = tokenizer.clean_report(example['report']).split()
-    #     total_tokens.extend(tokens)
-    #     report_length += len(tokens)
-    #     tot_report += 1
-    
-    # # for example in tokenizer.ann['val']:
-    # #     tokens = tokenizer.clean_report(example['report']).split()
-    # #     total_tokens.extend(tokens)
-    # #     report_length += len(tokens)
-    # #     tot_report += 1
-    
-    # # for example in tokenizer.ann['test']:
-    # #     tokens = tokenizer.clean_report(example['report']).split()
-    # #     total_tokens.extend(tokens)
-    # #     report_length += len(tokens)
-    # #     tot_report += 1
-
-    # counter = Counter(total_tokens)
-    
-    # vocab_freqs = {tok: freq for tok, freq in counter.items() if freq >= tokenizer.threshold}
-    # # vocab_freqs['<unk>'] = 1e-5  # Give <unk> a tiny freq to keep it
-    # # vocab_freqs = {tok: freq for tok, freq in counter.items()}
-
-    # sorted_tokens = sorted(vocab_freqs.items(), key=lambda x: x[1])
-
-    # print(f"Avg report length: {report_length / tot_report}")
-    # print(f"Vocab size: {len(sorted_tokens)}")
-
     sorted_tokens = [w for w in tokenizer.token2idx][:-2]
     print(f"Vocab size: {len(sorted_tokens)}")
     return sorted_tokens
@@ -66,7 +35,7 @@ def get_sorted_tokens(tokenizer):
 def get_report_text(file_path):
     with open(file_path, 'r') as f:
         json_data = json.load(f)
-    for split in ["train","val", "test"]:
+    for split in ["train"]:
         for example in json_data[split]:
             if 'report' in example:
                 yield example['report']
@@ -76,7 +45,7 @@ def extract_disease_entities(nlp, text):
     doc = nlp(text)
     for ent in doc.ents:
         if ent.label_ == "DISEASE":
-            for token in ent.text.split():
+            for token in ent.text.split(" "):
                 medical_terms.add(token)
     return medical_terms
 
