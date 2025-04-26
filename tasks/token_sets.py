@@ -7,6 +7,7 @@ import spacy
 from spacy.tokens import Doc
 from utils.tokenizers import Tokenizer
 
+
 def parse_agrs():
     parser = argparse.ArgumentParser()
 
