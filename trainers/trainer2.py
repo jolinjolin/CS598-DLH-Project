@@ -304,7 +304,6 @@ class Trainer(BaseTrainer):
             "[{}/{}] Start to train in the training set.".format(epoch, self.epochs)
         )
         train_loss = 0
-        """
         self.model.train()
         i = 0
         p = progressbar.ProgressBar()
@@ -314,7 +313,7 @@ class Trainer(BaseTrainer):
             images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(self.device), \
                                                  reports_masks.to(self.device)
 
-            if (i+1)%100 != 0:
+            if (i+1)%10 != 0:
                 self.optimizer.zero_grad()
                 output = self.model(images, reports_ids, mode='train')
                 loss = self.criterion(output, reports_ids, reports_masks)
@@ -375,7 +374,6 @@ class Trainer(BaseTrainer):
             self.logger.info('[{}/{}] Step: {}/{}, Training Loss: {:.5f}.'
                              .format(epoch, self.epochs, batch_idx, len(self.train_dataloader),
                                      train_loss / (batch_idx + 1)))
-        """
         log = {"train_loss": train_loss / len(self.train_dataloader)}
 
         self.logger.info(
@@ -386,7 +384,6 @@ class Trainer(BaseTrainer):
         self.model.eval()
 
         with torch.no_grad():
-            """
             val_gts, val_res = [], []
             for batch_idx, (images_id, images, reports_ids, reports_masks) in enumerate(self.val_dataloader):
                 images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(
@@ -401,7 +398,6 @@ class Trainer(BaseTrainer):
             val_met = self.metric_ftns({i: [gt] for i, gt in enumerate(val_gts)},
                                        {i: [re] for i, re in enumerate(val_res)})
             log.update(**{'val_' + k: v for k, v in val_met.items()})
-            """
             self.logger.info(
                 "[{}/{}] Start to evaluate in the test set.".format(epoch, self.epochs)
             )
