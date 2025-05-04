@@ -37,6 +37,8 @@ conda create --name TIMER python=3.8
 conda install pytorch==1.7.1 torchvision==0.8.2 torchaudio==0.7.2 cudatoolkit=11.0 -c pytorch
 pip install -r requirements.txt
 ```
+Additionally, [scispacy](https://allenai.github.io/scispacy/) is needed for name entity recognition in the dataset and [Chexpert-labeler](https://github.com/stanfordmlgroup/chexpert-labeler) is needed for report labeling in order to calculation F1 scores.
+
 
 ## Run
 ###
@@ -44,28 +46,22 @@ Run a task
 ```
 bash <task>.sh
 ```
+For example, train TIMER
+```
+bash train_iu_xray_TIMER.sh
+```
+To test TIMER, uncomment `save_report` and update paths in the `test_iu_xray.sh` and then run
+```
+bash test_iu_xray.sh
+```
+Postprocessing, run
+```
+bash f1_scores.sh
+```
 
 ## Datasets
-We use two datasets (IU X-Ray and MIMIC-CXR) in our paper.
+We use [IU X-Ray](https://openi.nlm.nih.gov/) Chest X-RAY dataset from Indiana University for this study.
 
-For `IU X-Ray`, you can download the dataset from [here](https://drive.google.com/file/d/1c0BXEuDy8Cmm2jfN0YYGkQxFZd2ZIoLg/view?usp=sharing) and then put the files in `data/iu_xray`.
-
-For `MIMIC-CXR`, you can download the dataset from [here](https://drive.google.com/file/d/1DS6NYirOXQf8qYieSVMvqNwuOlgAbM_E/view?usp=sharing) and then put the files in `data/mimic_cxr`.
-
-NOTE: The `IU X-Ray` dataset is of small size, and thus the variance of the results is large.
-There have been some works using `MIMIC-CXR` only and treating the whole `IU X-Ray` dataset as an extra test set.
-
-## Train
-
-Run `bash train_iu_xray.sh` to train a model on the IU X-Ray data.
-
-Run `bash train_mimic_cxr.sh` to train a model on the MIMIC-CXR data.
-
-## Test
-
-Run `bash test_iu_xray.sh` to test a model on the IU X-Ray data.
-
-Run `bash test_mimic_cxr.sh` to test a model on the MIMIC-CXR data.
-
+The processed data of `IU X-Ray` can be downloaded from [here](https://drive.google.com/file/d/1c0BXEuDy8Cmm2jfN0YYGkQxFZd2ZIoLg/view?usp=sharing).
 
 
