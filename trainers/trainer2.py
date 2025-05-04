@@ -5,7 +5,7 @@ from abc import abstractmethod
 import torch
 from numpy import inf
 import torch.nn.functional as F
-import progressbar
+from tqdm import tqdm
 import numpy as np
 from models.metalearning_model import MetaLearningModel
 
@@ -122,8 +122,8 @@ class BaseTrainer(object):
         if not os.path.exists(self.checkpoint_dir):
             os.makedirs(self.checkpoint_dir)
 
-        # if args.resume is not None:
-        self._resume_checkpoint(args.resume)
+        if args.resume is not None:
+            self._resume_checkpoint(args.resume)
 
     @abstractmethod
     def _train_epoch(self, epoch):
@@ -306,9 +306,8 @@ class Trainer(BaseTrainer):
         train_loss = 0
         self.model.train()
         i = 0
-        p = progressbar.ProgressBar()
-        p.start(len(self.train_dataloader))
-        for batch_idx, (images_id, images, reports_ids, reports_masks) in p(enumerate(self.train_dataloader)):
+
+        for (images_id, images, reports_ids, reports_masks,_,images_id2,images2,reports_ids2,reports_masks2,_,) in tqdm(self.train_dataloader):
 
             images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(self.device), \
                                                  reports_masks.to(self.device)
@@ -342,7 +341,7 @@ class Trainer(BaseTrainer):
 
                     output,_ = self.model2(images, mode='sample')
                     reports = self.model.tokenizer.decode_batch(output.cpu().numpy())
-                    rl_reward = torch.tensor(self.reward(ground_truths[:10],reports)).cuda(1)
+                    rl_reward = torch.tensor(self.reward(ground_truths[:10],reports)).cuda(0)
 
                 self.metarl_opt.zero_grad()
                 #self.optimizer.zero_grad() #new
@@ -367,13 +366,11 @@ class Trainer(BaseTrainer):
                     self.model2.load_state_dict(self.model.state_dict())
 
             i += 1
-            p.update(i)
-        p.finish()
         
-        if batch_idx % self.args.log_period == 0:
-            self.logger.info('[{}/{}] Step: {}/{}, Training Loss: {:.5f}.'
-                             .format(epoch, self.epochs, batch_idx, len(self.train_dataloader),
-                                     train_loss / (batch_idx + 1)))
+        # if batch_idx % self.args.log_period == 0:
+        #     self.logger.info('[{}/{}] Step: {}/{}, Training Loss: {:.5f}.'
+        #                      .format(epoch, self.epochs, batch_idx, len(self.train_dataloader),
+        #                              train_loss / (batch_idx + 1)))
         log = {"train_loss": train_loss / len(self.train_dataloader)}
 
         self.logger.info(
@@ -385,7 +382,7 @@ class Trainer(BaseTrainer):
 
         with torch.no_grad():
             val_gts, val_res = [], []
-            for batch_idx, (images_id, images, reports_ids, reports_masks) in enumerate(self.val_dataloader):
+            for batch_idx, (images_id, images, reports_ids, reports_masks,_,images_id2,images2,reports_ids2,reports_masks2,_,) in enumerate(self.val_dataloader):
                 images, reports_ids, reports_masks = images.to(self.device), reports_ids.to(
                     self.device), reports_masks.to(self.device)
 
@@ -405,12 +402,7 @@ class Trainer(BaseTrainer):
             j = 0
             with torch.no_grad():
                 test_gts, test_res = [], []
-                for batch_idx, (
-                    images_id,
-                    images,
-                    reports_ids,
-                    reports_masks,
-                ) in enumerate(self.test_dataloader):
+                for batch_idx, (images_id, images, reports_ids, reports_masks,_,images_id2,images2,reports_ids2,reports_masks2,_,) in enumerate(self.test_dataloader):
                     images, reports_ids, reports_masks = (
                         images.to(self.device),
                         reports_ids.to(self.device),
@@ -441,7 +433,7 @@ class Trainer(BaseTrainer):
         return log
 
     def reward(self, tgt, pre):
-        words = [w for w in self.model.tokenizer.token2idxIM][:-2]
+        words = [w for w in self.model.tokenizer.token2idx][:-2]
         recall_ = []
         precision_ = []
         right_ = []
@@ -470,7 +462,7 @@ class Trainer(BaseTrainer):
         tgt,
     ):
         # words = dict(sorted(dict(self.model.tokenizer.counter).items(), key=lambda x: x[1]))
-        words = [w for w in self.model.tokenizer.token2idxIM][:-2]
+        words = [w for w in self.model.tokenizer.token2idx][:-2]
         recall_ = []
         precision_ = []
         right_ = []

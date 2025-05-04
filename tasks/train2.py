@@ -1,11 +1,12 @@
 import argparse
-
 import numpy as np
 import torch
-
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from models.CMN_model import CMNModel
 from models.R2Gen_model import R2GenModel
-from dataloaders.dataloader import R2DataLoader
+from dataloaders.dataloader2 import R2DataLoader
 from trainers.loss import compute_loss
 from trainers.metrics import compute_scores
 from trainers.optimizers import build_optimizer, build_lr_scheduler
@@ -17,15 +18,15 @@ def parse_agrs():
     parser = argparse.ArgumentParser()
 
     # Data input settings
-    '''
+
     parser.add_argument('--image_dir', type=str, default='data/iu_xray/images/',
                         help='the path to the directory containing the data.')
     parser.add_argument('--ann_path', type=str, default='data/iu_xray/annotation.json',
                         help='the path to the directory containing the data.')
-    '''
+    """
     parser.add_argument('--image_dir', type=str, default='/home/ywu10/Documents/R2Gen/data/mimic_cxr/images', help='the path to the directory containing the data.')
     parser.add_argument('--ann_path', type=str, default='/home/ywu10/Documents/R2Gen/data/mimic_cxr/annotation.json', help='the path to the directory containing the data.')
-
+    """
 
     # Data loader settings
     parser.add_argument('--dataset_name', type=str, default='mimic_cxr', choices=['iu_xray', 'mimic_cxr'],
@@ -57,7 +58,6 @@ def parse_agrs():
     parser.add_argument('--topk', type=int, default=32, help='the number of k.')
     parser.add_argument('--cmm_size', type=int, default=2048, help='the numebr of cmm size.')
     parser.add_argument('--cmm_dim', type=int, default=512, help='the dimension of cmm dimension.')
-    parser.add_argument('--rm_num_slots', type=int, default=3, help='the number of memory slots.')
 
      # for Relational Memory
     parser.add_argument('--rm_num_slots', type=int, default=3, help='the number of memory slots.')
